@@ -6,6 +6,10 @@ This Library Collects changes from several 3rd party scriptfiles and applies the
 
 **Note this is a Pre-Release Version, so things are subject to change until 1.0.0 is done and as such Semantic Versioning (important for Mod Developers only) does not apply yet - this Library is a proof of concept for now**
 
+This Readme is in Markdown format, please go visit the https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/blob/main/README.md for proper formatting and to ensure the linked sections work
+
+Things like the CHANGELOG, ROADMAP and LICENSE are not included in the "release" archive because Mod Managers like MO2 or JSGME will trigger "conflicts" when two mods have the same files (even though the files are unused by the game itself - e.g. if two mods have a "LICENSE" file they will show up as conflicts which is nonsense since the file is unused by Stalker Anomaly)
+
 ## Who is this for
 
 ### Mod Users

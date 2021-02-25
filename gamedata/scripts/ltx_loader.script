@@ -1,0 +1,75 @@
+--[[
+
+    Author: EngineOfDarkness
+    
+    This work is licensed under the GPL-3.0 License 
+    
+    --------------------------------------------
+
+    A script based solution that allows modders to change some ltx properties without overwriting actual vanilla files
+    
+    See README.md for detailed examples
+    
+--]]
+
+local Ini               = require "gamedata\\scripts\\config\\Ini"
+local ChangesetLoader   = require "gamedata\\scripts\\config\\ChangesetLoader"
+
+local SystemIniInstance       = Ini()
+local ChangesetLoaderInstance = ChangesetLoader()
+
+local function on_console_execute(commandName)
+    if commandName == "quit" then 
+        SystemIniInstance:restoreOriginalSystemLtx()
+    end
+end
+
+local function applyChangesets(changesets)
+    local hasAppliedAnyChange = false
+
+    for _, changeset in ipairs(changesets) do
+        printf("LTX-LIBRARY: Applying modifications from %s", changeset.name)
+
+        for _, change in ipairs(changeset.changes) do 
+            local section   = change.section
+            local property  = change.property
+            local value     = change.value
+
+            if value then
+                printf(" > LTX-LIBRARY: Applying value '%s' to property '%s' of section '%s'", value, property, section)
+                SystemIniInstance:write_value(section, property, value)
+            else
+                --note handle with extra care, the inheriting behaviour of sections cannot be used at this point, so if you remove a required property the game crashes
+                printf(" > LTX-LIBRARY: Removing property '%s' of section '%s' because the value was set to nil", property, section)
+                SystemIniInstance:remove_line(section, property)
+            end
+
+            hasAppliedAnyChange = true
+        end
+    end
+
+    return hasAppliedAnyChange
+end
+
+local function executeLoader()
+    local changesets            = ChangesetLoaderInstance:processChangesets()
+    local hasAppliedAnyChange   = false
+
+    if #changesets > 0 then
+        hasAppliedAnyChange = applyChangesets(changesets)
+
+        if hasAppliedAnyChange then
+            SystemIniInstance:commitSystemLtxChanges()
+            SystemIniInstance:reloadSystemIni()
+        end
+    end
+end
+
+function register()
+    RegisterScriptCallback("on_console_execute", on_console_execute)
+
+    SystemIniInstance:storeOriginalSystemLtx()
+    SystemIniInstance:restoreOriginalSystemLtx()
+
+    executeLoader()
+end
