@@ -1,0 +1,2 @@
+# mark Stalker Anomaly .script files as lua
+*.script linguist-language=Lua
