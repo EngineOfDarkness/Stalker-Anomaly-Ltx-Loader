@@ -49,15 +49,12 @@ function ChangesetLoader:loadCallbackFiles()
             local fileExtension = self:getFileExtension(filename) 
             filename            = filename:sub(0, filename:len() - fileExtension:len() - 1) -- removes the file extension from the name (-1 because I did not include the dot in the fileExtension)
 
-            if (not _G[filename] or not _G[filename][self.callbackFunctionName]) then
-                printe("LTX-LIBRARY: ERROR: The filename %s does not provide the function '%s', skipping.", filename .. fileExtension, self.callbackFunctionName)
-                goto continue
+            if (_G[filename] and _G[filename][self.callbackFunctionName]) then
+                loadedFiles[#loadedFiles+1] = filename
+            else
+                printe("LTX-LIBRARY: ERROR: The filename '%s' does not provide the function '%s', skipping.", filename .. fileExtension, self.callbackFunctionName)
             end
-
-            loadedFiles[#loadedFiles+1] = filename
         end
-
-        ::continue::
     end
 
     return loadedFiles
@@ -77,14 +74,10 @@ function ChangesetLoader:loadChangesets(loadedScripts)
     for _, filename in ipairs(loadedScripts) do
         local changeset = _G[filename][self.callbackFunctionName]()
 
-        if not self:isChangesetValid(changeset, filename) then
-            goto continue
+        if self:isChangesetValid(changeset, filename) then
+            printf("LTX-LIBRARY: Registered changes from '%s'", changeset.name)
+            validChangesets[#validChangesets+1] = changeset
         end
-
-        printf("LTX-LIBRARY: Registered changes from '%s'", changeset.name)
-        validChangesets[#validChangesets+1] = changeset
-
-        ::continue::
     end
 
     return validChangesets
@@ -92,7 +85,7 @@ end
 
 function ChangesetLoader:isChangesetValid(changeset, filename)
     if (not changeset or type(changeset.isValid) ~= "function") then
-        printe("LTX-LIBRARY: ERROR: Return value of %s is not a Changeset instance, please see the readme section for 'Changeset', modification will be skipped", filename)
+        printe("LTX-LIBRARY: ERROR: Return value of '%s' is not a Changeset instance, please see the readme section for 'Changeset', modification will be skipped", filename)
         return false
     end
 

@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- Refactored `ChangesetLoader.lua`
+    - removed occurences of `goto continue` - was leftover from earlier experimentation
 - Refactored some method names in `gamedata\scripts\config\Ini.lua`
     - `commitSystemLtxChanges` to `commitChanges`
     - `storeOriginalSystemLtx` to `storeOriginal`
