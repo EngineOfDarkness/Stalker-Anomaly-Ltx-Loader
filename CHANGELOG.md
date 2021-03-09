@@ -5,9 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- `FileLoader.lua` - class to load files based on the file both matching file pattern and containing the configured method
+
 ### Changed
 - Refactored `ChangesetLoader.lua`
     - removed occurences of `goto continue` - was leftover from earlier experimentation
+    - removed Methods `loadCallbackFiles` and `getFileExtension` (refactored into new class `FileLoader.lua`)
+    - imported `FileLoader.lua` which will be used to load files that are used for Changesets
+- Refactored usage of `ChangesetLoader.lua` in `ltx_loader.script` - the constructor now contains the properties that are used (instead of hiding them in the `ChangesetLoader.lua` as fallback
 - Refactored some method names in `gamedata\scripts\config\Ini.lua`
     - `commitSystemLtxChanges` to `commitChanges`
     - `storeOriginalSystemLtx` to `storeOriginal`

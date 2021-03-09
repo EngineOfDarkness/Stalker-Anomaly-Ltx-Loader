@@ -6,20 +6,34 @@
 
     --------------------------------------------
 
-    Takes care of loading files ending in _ltx.script (by default) and executing a method called "registerLtxModifications" inside each file that has the aforementioned pattern
+    Takes care of Loading Changeset Instances from files which have both the configured naming patter and the configured function
+    
+    The folder is optional and defaults to "$game_scripts$"
+
+    Usage Example:
+    
+    -- first require the module
+    local ChangesetLoader = require "gamedata\\scripts\\config\\ChangesetLoader"
+    
+    -- then create an instance - the first two parameters are required, the last paramter defaults to "$game_scripts$" and is the folder in which the search takes place (does not traverse to subfolders!)
+    local ChangesetLoaderInstance = ChangesetLoader("*_ltx.script", "registerLtxModifications")
 
 --]]
+
+local FileLoader = require "gamedata\\scripts\\config\\FileLoader"
 
 local ChangesetLoader   = {}
 ChangesetLoader.__index = ChangesetLoader
 
-local function construct(_, callbackFunctionName, folder, fileNamePattern)
+local function construct(_, fileNamePattern, callbackFunctionName, folder)
     local newChangesetLoader = {}
     setmetatable(newChangesetLoader, ChangesetLoader)
+    
+    assert(fileNamePattern ~= nil and type(fileNamePattern) == "string" and fileNamePattern:len() > 0, "A filename pattern has to be defined, e.g. '*_ltx.script'")
+    assert(callbackFunctionName ~= nil and type(callbackFunctionName) == "string" and callbackFunctionName:len() > 0, "A callback function name has to be defined, e.g. 'myCallbackFunction'")
 
-    newChangesetLoader.callbackFunctionName = callbackFunctionName or "registerLtxModifications"
-    newChangesetLoader.folder               = folder or "$game_scripts$"
-    newChangesetLoader.fileNamePattern      = fileNamePattern or "*_ltx.script"
+    newChangesetLoader.callbackFunctionName = callbackFunctionName
+    newChangesetLoader.fileLoader           = FileLoader(fileNamePattern, callbackFunctionName, folder)
 
     return newChangesetLoader
 end
@@ -27,49 +41,16 @@ end
 setmetatable(ChangesetLoader, {__call = construct})
 
 function ChangesetLoader:processChangesets()
-    local loadedFiles       = self:loadCallbackFiles()
-    local validChangesets   = self:loadChangesets(loadedFiles)
+    local validChangesets = self:loadChangesets()
 
     --todo rudimentary mod sorting be here
 
     return validChangesets
 end
 
---loads all .script files that end like this "_ltx.script" - for example "author_modname_ltx.script"
-function ChangesetLoader:loadCallbackFiles()
-    local loadedFiles   = {}
-    local files         = getFS():file_list_open_ex(self.folder, bit_or(FS.FS_ListFiles,FS.FS_RootOnly), self.fileNamePattern)
-    local fileCount     = files:Size()
-
-    for	i=0, fileCount-1 do
-        local file      = files:GetAt(i)
-        local filename  = file:NameShort()
-
-        if (file:Size() > 0) then
-            local fileExtension = self:getFileExtension(filename) 
-            filename            = filename:sub(0, filename:len() - fileExtension:len() - 1) -- removes the file extension from the name (-1 because I did not include the dot in the fileExtension)
-
-            if (_G[filename] and _G[filename][self.callbackFunctionName]) then
-                loadedFiles[#loadedFiles+1] = filename
-            else
-                printe("LTX-LIBRARY: ERROR: The filename '%s' does not provide the function '%s', skipping.", filename .. fileExtension, self.callbackFunctionName)
-            end
-        end
-    end
-
-    return loadedFiles
-end
-
--- returns the file extension (without the dot)
-function ChangesetLoader:getFileExtension(filename)
-    local reversedFilename  = filename:reverse()
-    local lastDotPosition   = reversedFilename:find("%.")
-	
-    return filename:sub(1 - lastDotPosition)
-end
-
-function ChangesetLoader:loadChangesets(loadedScripts)
-    local validChangesets = {}
+function ChangesetLoader:loadChangesets()
+    local loadedScripts     = self.fileLoader:loadFiles()
+    local validChangesets   = {}
 
     for _, filename in ipairs(loadedScripts) do
         local changeset = _G[filename][self.callbackFunctionName]()
