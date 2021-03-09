@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- Refactored some method names in `gamedata\scripts\config\Ini.lua`
+    - `commitSystemLtxChanges` to `commitChanges`
+    - `storeOriginalSystemLtx` to `storeOriginal`
+    - `restoreOriginalSystemLtx` to `restoreOriginal`
+- Changed calls to `Ini()` functions inside `ltx_loader.script` to the corresponding new ones
+
 ## [0.1.0] - 2021-03-07
 ### Added
  - `CHANGELOG.md` to document changes in this project

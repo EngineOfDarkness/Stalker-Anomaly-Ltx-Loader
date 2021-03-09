@@ -20,7 +20,7 @@ local ChangesetLoaderInstance = ChangesetLoader()
 
 local function on_console_execute(commandName)
     if commandName == "quit" then 
-        SystemIniInstance:restoreOriginalSystemLtx()
+        SystemIniInstance:restoreOriginal()
     end
 end
 
@@ -59,7 +59,7 @@ local function executeLoader()
         hasAppliedAnyChange = applyChangesets(changesets)
 
         if hasAppliedAnyChange then
-            SystemIniInstance:commitSystemLtxChanges()
+            SystemIniInstance:commitChanges()
             SystemIniInstance:reloadSystemIni()
         end
     end
@@ -68,8 +68,8 @@ end
 function register()
     RegisterScriptCallback("on_console_execute", on_console_execute)
 
-    SystemIniInstance:storeOriginalSystemLtx()
-    SystemIniInstance:restoreOriginalSystemLtx()
+    SystemIniInstance:storeOriginal()
+    SystemIniInstance:restoreOriginal()
 
     executeLoader()
 end

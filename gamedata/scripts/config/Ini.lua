@@ -53,7 +53,7 @@ function Ini:reloadSystemIni()
     clear_ini_cache(ini_sys)
 end
 
-function Ini:commitSystemLtxChanges()
+function Ini:commitChanges()
     local iniFileEx = ini_file_ex(self.originalName, true)
 
     for _, requestedChange in ipairs(self.requestedChanges) do
@@ -71,7 +71,7 @@ function Ini:commitSystemLtxChanges()
 end
 
 -- stores the original "system.ltx" as it was on start of the game
-function Ini:storeOriginalSystemLtx()
+function Ini:storeOriginal()
     -- check if there is no copy currently
     if lfs.attributes(self.copyPath) == nil then
         printf("LTX-LIBRARY: Stored a copy of the original '%s' named '%s'", self.originalPath, self.copyPath)
@@ -81,34 +81,34 @@ function Ini:storeOriginalSystemLtx()
         return true
     end
 
-    printe("LTX-LIBRARY: The original %s has already been created!", self.originalName)
+    printe("LTX-LIBRARY: The original '%s' has already been created!", self.originalName)
     return false 
 end
 
--- restores the original "system.ltx" that should have been stored using storeOriginalSystemLtx
-function Ini:restoreOriginalSystemLtx()
+-- restores the original "system.ltx" that should have been stored using storeOriginal
+function Ini:restoreOriginal()
     -- check if there is copy that can be restored
     if lfs.attributes(self.copyPath) ~= nil then
         printf("LTX-LIBRARY: Restored the original '%s' from '%s'", self.originalPath, self.copyPath)
 
         self.fileSystem:file_copy(self.copyPath, self.originalPath)
         -- yes we have to do an empty write here, otherwise "quitting" without loading or starting a new game will not restore the original ini (original in terms of values, not "looks")
-        self:commitSystemLtxChanges()
+        self:commitChanges()
         self.reloadSystemIni()
 
         return true
     end
 
-    printe("LTX-LIBRARY: ERROR: Nothing to restore, did you execute storeOriginalSystemLtx() beforehand?")
+    printe("LTX-LIBRARY: ERROR: Nothing to restore, did you execute storeOriginal() beforehand?")
     return false
 end
 
--- the change will be cached and actually written in commitSystemLtxChanges
+-- the change will be cached and actually written in commitChanges
 function Ini:write_value(section, property, value)
     self.requestedChanges[#self.requestedChanges + 1] = {method = "w_value", vars = {section, property, value}}
 end
 
--- the change will be cached and actually written in commitSystemLtxChanges
+-- the change will be cached and actually written in commitChanges
 function Ini:remove_line(section, property)
     self.requestedChanges[#self.requestedChanges + 1] = {method = "remove_line", vars = {section, property}}
 end
