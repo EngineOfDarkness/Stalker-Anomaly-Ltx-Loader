@@ -7,8 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - `FileLoader.lua` - class to load files based on the file both matching file pattern and containing the configured method
+- `autoloader.script` - uses `FileLoader.lua` to autoload all files that end on `_autoload.script` and executes the function `register` on them
+    - this scripts function `register` is now called from `gamedata/configs/script.ltx`
 
 ### Changed
+- Renamed `ltx_loader.script` to `ltx_autoload.script` to make use of the newly introduced `autoloader.script`
+    - this scripts function `register` is no longer called from `gamedata/configs/script.ltx`
 - Refactored `ChangesetLoader.lua`
     - removed occurences of `goto continue` - was leftover from earlier experimentation
     - removed Methods `loadCallbackFiles` and `getFileExtension` (refactored into new class `FileLoader.lua`)
