@@ -17,7 +17,7 @@ local ChangesetLoader   = require "gamedata\\scripts\\config\\ChangesetLoader"
 local ChangeWriter      = require "gamedata\\scripts\\config\\ChangeWriter"
 
 local SystemIniInstance       = Ini()
-local ChangesetLoaderInstance = ChangesetLoader("*_ltx.script", "registerLtxModifications")
+local ChangesetLoaderInstance = ChangesetLoader("*_system_mod.script", "registerSystemLtxModifications")
 local ChangeWriterInstance    = ChangeWriter()
 
 local function on_console_execute(commandName)

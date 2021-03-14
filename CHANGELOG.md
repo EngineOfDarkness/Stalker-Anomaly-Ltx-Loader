@@ -29,6 +29,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     - Refactored usage of `ChangesetLoader.lua` - the constructor now contains the autoloaded filePattern and the expected method name
     - changed calls to `Ini.lua` functions inside `ltx_loader.script` to the corresponding new ones
     - some code refactored into `ChangeWriter.lua` for reusability
+    - filePattern changed from `*_ltx.script` to `*_system_mod.script`
+    - methodName changed from `registerLtxModifications` to `registerSystemLtxModifications`
 - `gamedata\scripts\config\Change.lua`
     - Removed ini specific section checks in (now part of `gamedata\scripts\config\Changeset.lua`)
 - `gamedata\scripts\config\Changeset.lua` 
