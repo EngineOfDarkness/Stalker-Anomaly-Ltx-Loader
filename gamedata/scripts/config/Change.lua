@@ -35,34 +35,25 @@ setmetatable(Change, {__call = construct})
 -- no, debug.traceback cannot be used because it can happen that the calling script is NOT part of the traceback (yes, had that happen while testing using assert)
 function Change:validateProperties()
     if type(self.property) ~= "string" then
-        self:addError("Change ERROR: property expects a string")
+        self:addError("Change ERROR: 'property' expects a string")
     end
 
     if type(self.property) == "string" and string.len(self.property) == 0 then
-        self:addError("Change ERROR: property cannot be an empty string")
+        self:addError("Change ERROR: 'property' cannot be an empty string")
     end
 
     if type(self.value) == "function" then
-        self:addError("Change ERROR: value cannot be a function")
+        self:addError("Change ERROR: 'value' cannot be a function")
     end
 
     if type(self.section) ~= "string" then
-        self:addError("Change ERROR: section expects a string")
+        self:addError("Change ERROR: 'section' expects a string")
         return
     end
 
     if type(self.section) == "string" and string.len(self.section) == 0 then
-        self:addError("Change ERROR: section cannot be an empty string")
+        self:addError("Change ERROR: 'section' cannot be an empty string")
         return
-    end
-
-    if not ini_sys then
-        self:addError("Change ERROR: system.ltx could not be loaded")
-        return
-    end
-
-    if not ini_sys:section_exist(self.section) then
-        self:addError("Change ERROR: the section " .. self.section .. " does not exist, please use Anomalies default methods to add new items")
     end
 end
 

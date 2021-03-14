@@ -1,0 +1,79 @@
+--[[
+
+    Author: EngineOfDarkness
+    
+    This work is licensed under the GPL-3.0 License 
+    
+    --------------------------------------------
+
+    A script based solution that allows modders to change some trader ltx properties without overwriting actual vanilla trader files
+    
+    See README.md for detailed examples
+    
+--]]
+
+local Ini               = require "gamedata\\scripts\\config\\Ini"
+local ChangesetLoader   = require "gamedata\\scripts\\config\\ChangesetLoader"
+local ChangeWriter      = require "gamedata\\scripts\\config\\ChangeWriter"
+
+local ChangesetLoaderInstance   = ChangesetLoader("*_trader_mod.script", "registerTraderLtxModifications")
+local ChangeWriterInstance      = ChangeWriter()
+
+local function getChangesetsGroupedByTraders()
+    local changesets        = ChangesetLoaderInstance:processChangesets()
+    local groupedChangesets = {}
+
+    for _, changeset in ipairs(changesets) do
+        if changeset.ltx then
+            if not groupedChangesets[changeset.ltx] then
+                groupedChangesets[changeset.ltx] = {}
+            end
+        
+            groupedChangesets[changeset.ltx][#groupedChangesets[changeset.ltx] + 1] = changeset
+        end
+    end
+    
+    return groupedChangesets
+end
+
+local function executeLoader()
+    local groupedTraderChangesets = getChangesetsGroupedByTraders()
+    
+    for ltx, traderChangesets in pairs(groupedTraderChangesets) do
+        local traderIniInstance     = Ini(ltx)
+        local hasAppliedAnyChange   = false
+
+        traderIniInstance:storeBackup()
+    
+        for _, traderChangeset in ipairs(traderChangesets) do
+            for _, change in ipairs(traderChangeset.changes) do 
+                ChangeWriterInstance:writeChangeToIni(change, traderIniInstance)
+
+                hasAppliedAnyChange = true
+            end
+        end
+        
+        if hasAppliedAnyChange then
+            traderIniInstance:commitChanges()
+            traderIniInstance:reloadSystemIni()
+        end
+    end
+end
+
+local function on_console_execute(commandName)
+    if commandName == "quit" then 
+        local groupedTraderChangesets = getChangesetsGroupedByTraders()
+    
+        for ltx, traderChangesets in pairs(groupedTraderChangesets) do
+            local traderIniInstance = Ini(ltx)
+            
+            traderIniInstance:restoreFromBackup()
+        end
+    end
+end
+
+function register()
+    RegisterScriptCallback("on_console_execute", on_console_execute)
+    
+    executeLoader()
+end

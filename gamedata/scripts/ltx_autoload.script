@@ -6,7 +6,7 @@
     
     --------------------------------------------
 
-    A script based solution that allows modders to change some ltx properties without overwriting actual vanilla files
+    A script based solution that allows modders to change system.ltx properties without overwriting actual vanilla files that are part of system.ltx
     
     See README.md for detailed examples
     
@@ -14,13 +14,15 @@
 
 local Ini               = require "gamedata\\scripts\\config\\Ini"
 local ChangesetLoader   = require "gamedata\\scripts\\config\\ChangesetLoader"
+local ChangeWriter      = require "gamedata\\scripts\\config\\ChangeWriter"
 
 local SystemIniInstance       = Ini()
 local ChangesetLoaderInstance = ChangesetLoader("*_ltx.script", "registerLtxModifications")
+local ChangeWriterInstance    = ChangeWriter()
 
 local function on_console_execute(commandName)
     if commandName == "quit" then 
-        SystemIniInstance:restoreOriginal()
+        SystemIniInstance:restoreFromBackup()
     end
 end
 
@@ -31,18 +33,7 @@ local function applyChangesets(changesets)
         printf("LTX-LIBRARY: Applying modifications from %s", changeset.name)
 
         for _, change in ipairs(changeset.changes) do 
-            local section   = change.section
-            local property  = change.property
-            local value     = change.value
-
-            if value then
-                printf(" > LTX-LIBRARY: Applying value '%s' to property '%s' of section '%s'", value, property, section)
-                SystemIniInstance:write_value(section, property, value)
-            else
-                --note handle with extra care, the inheriting behaviour of sections cannot be used at this point, so if you remove a required property the game crashes
-                printf(" > LTX-LIBRARY: Removing property '%s' of section '%s' because the value was set to nil", property, section)
-                SystemIniInstance:remove_line(section, property)
-            end
+            ChangeWriterInstance:writeChangeToIni(change, SystemIniInstance)
 
             hasAppliedAnyChange = true
         end
@@ -66,10 +57,9 @@ local function executeLoader()
 end
 
 function register()
+    SystemIniInstance:storeBackup()
+    
     RegisterScriptCallback("on_console_execute", on_console_execute)
-
-    SystemIniInstance:storeOriginal()
-    SystemIniInstance:restoreOriginal()
 
     executeLoader()
 end

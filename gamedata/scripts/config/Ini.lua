@@ -5,6 +5,8 @@
     This work is licensed under the GPL-3.0 License 
 
     --------------------------------------------
+    
+    TODO needs better docs
 
     I tried multiple solutions to ensure the system.ltx is almost always in a clean state:
     - deleting the UNPACKED system.ltx on game startup -> always crashes with missing sections - even if you do execute reload_ini_sys and clear_ini_cache
@@ -14,8 +16,8 @@
 
     So the only way to ensure that modifications get applied to a clean system.ltx is to
 
-    - get the CURRENT system.ltx on startup and copy it somewhere else
-    - then get the copy and overwrite the current system.ltx
+    - get the CURRENT system.ltx on startup and backup it somewhere else
+    - then get the backup and overwrite the current system.ltx
         - this catches the case that the game crashes - I ALWAYS want a clean system.ltx to apply the modifications to
         - this is technically not neccessary on first start (since the current system.ltx is already the fresh one) but eh, not worth the additional code for now.
     - then have my library make its modifications
@@ -27,19 +29,29 @@
 
 --]]
 
+local File = require "gamedata\\scripts\\config\\File"
+
 local Ini   = {}
 Ini.__index = Ini
 
-local function construct(_, originalName, copyName)
+local function construct(_, originalName, backupName, tempName)
     local newIni = {}
     setmetatable(newIni, Ini)
+    
+    originalName = originalName or "system.ltx"
+    
+    local fileInstance      = File(originalName)
+    local fileExtension     = fileInstance:getExtension()
+    local fileLessExtension = fileInstance:removeExtension()
 
-    newIni.originalName     = originalName or "system.ltx"
-    newIni.copyName         = copyName or "original_system.ltx"
+    newIni.originalName     = originalName
+    newIni.backupName       = backupName or fileLessExtension .. ".backup." .. fileExtension
+    newIni.tempName         = tempName or fileLessExtension .. ".temp." .. fileExtension
     newIni.fileSystem       = getFS()
     newIni.gameConfigPath   = newIni.fileSystem:update_path("$game_config$", "")
     newIni.originalPath     = newIni.gameConfigPath .. newIni.originalName
-    newIni.copyPath         = newIni.gameConfigPath .. newIni.copyName
+    newIni.backupPath       = newIni.gameConfigPath .. newIni.backupName
+    newIni.tempPath         = newIni.gameConfigPath .. newIni.tempName
     newIni.requestedChanges = {}
 
     return newIni
@@ -54,7 +66,9 @@ function Ini:reloadSystemIni()
 end
 
 function Ini:commitChanges()
-    local iniFileEx = ini_file_ex(self.originalName, true)
+    self:createTemporaryFromBackup() -- we'll write to a temp file and copy that over the original, because this for some reason causes less issues
+    
+    local iniFileEx = ini_file_ex(self.tempName, true)
 
     for _, requestedChange in ipairs(self.requestedChanges) do
         local method    = requestedChange.method
@@ -63,43 +77,52 @@ function Ini:commitChanges()
         iniFileEx[method](iniFileEx, unpack(vars))
     end
 
-    printf("LTX-LIBRARY: Saving %s", self.originalName)
+    printf("LTX-LIBRARY: Saving %s", self.tempPath)
     iniFileEx:save()
 
     iniFileEx               = nil
     self.requestedChanges   = {}
+    
+    self:overwriteOriginalWithTemporary()
 end
 
--- stores the original "system.ltx" as it was on start of the game
-function Ini:storeOriginal()
-    -- check if there is no copy currently
-    if lfs.attributes(self.copyPath) == nil then
-        printf("LTX-LIBRARY: Stored a copy of the original '%s' named '%s'", self.originalPath, self.copyPath)
+function Ini:createTemporaryFromBackup()
+    printf("LTX-LIBRARY: Create temporary file '%s' from '%s'", self.tempPath, self.backupPath)
+    self.fileSystem:file_copy(self.backupPath, self.tempPath)
+end
 
-        self.fileSystem:file_copy(self.originalPath, self.copyPath)
+function Ini:overwriteOriginalWithTemporary()
+    printf("LTX-LIBRARY: Overwrite original file '%s' with '%s'", self.originalPath, self.tempPath)
+    self.fileSystem:file_copy(self.tempPath, self.originalPath)
+end
+
+-- stores the original file as it was on start of the game
+function Ini:storeBackup()
+    -- check if there is no backup currently
+    if lfs.attributes(self.backupPath) == nil then
+        printf("LTX-LIBRARY: Stored a backup of the original '%s' named '%s'", self.originalPath, self.backupPath)
+
+        self.fileSystem:file_copy(self.originalPath, self.backupPath)
 
         return true
     end
 
-    printe("LTX-LIBRARY: The original '%s' has already been created!", self.originalName)
+    printe("LTX-LIBRARY: The backup for '%s' has already been created!", self.originalPath)
     return false 
 end
 
--- restores the original "system.ltx" that should have been stored using storeOriginal
-function Ini:restoreOriginal()
-    -- check if there is copy that can be restored
-    if lfs.attributes(self.copyPath) ~= nil then
-        printf("LTX-LIBRARY: Restored the original '%s' from '%s'", self.originalPath, self.copyPath)
+-- restores the original file that should have been stored using storeBackup
+function Ini:restoreFromBackup()
+    -- check if there is backup that can be restored
+    if lfs.attributes(self.backupPath) ~= nil then
+        printf("LTX-LIBRARY: Restored the original '%s' from '%s'", self.originalPath, self.backupPath)
 
-        self.fileSystem:file_copy(self.copyPath, self.originalPath)
-        -- yes we have to do an empty write here, otherwise "quitting" without loading or starting a new game will not restore the original ini (original in terms of values, not "looks")
-        self:commitChanges()
-        self.reloadSystemIni()
+        self.fileSystem:file_copy(self.backupPath, self.originalPath)
 
         return true
     end
 
-    printe("LTX-LIBRARY: ERROR: Nothing to restore, did you execute storeOriginal() beforehand?")
+    printe("LTX-LIBRARY: ERROR: Nothing to restore, did you execute storeBackup() beforehand?")
     return false
 end
 
