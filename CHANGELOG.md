@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     - Autoloads scriptfiles that are used to create `Changeset.lua` instaces meant to edit trader files
 
 ### Changed
+- Updated the `README.md`
 - `gamedata/scripts/ltx_autoload.script`
     - Renamed from `ltx_loader.script` to `ltx_autoload.script`
     - automatically called by `gamedata\scripts\autoloader.script`
