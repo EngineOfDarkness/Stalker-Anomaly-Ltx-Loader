@@ -64,4 +64,11 @@ function File:getExtension()
     return self.filename:sub(1 - lastDotPosition)
 end
 
+-- checks if the file exists inside the games config dir (can also check subdirs if you give the path as part of the filename)
+function File:existsInGameConfigPath()
+    local fileSystem = getFS()
+    
+    return fileSystem:exist("$game_config$", self.filename)
+end
+
 return File

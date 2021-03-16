@@ -17,6 +17,8 @@
     local changeWriterInstance = ChangeWriter()
     
     -- lastly execute a function, e.g. writeChangeToIni
+    -- first parameter has to be a Change Instance (see Change.lua)
+    -- second parameter has to be an Ini Instance (see Ini.lua)
     changeWriterInstance:writeChangeToIni(aChangeInstance, aIniInstance)
 --]]
 

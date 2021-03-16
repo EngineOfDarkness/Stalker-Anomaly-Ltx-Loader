@@ -9,6 +9,12 @@
     Creates a new Change "object" which holds the section name, the property name of that section and the final value
 
     See README.md for detailed examples
+    
+    -- first require the module
+    local Change = require "gamedata\\scripts\\config\\Change"
+    
+    -- then create an instance - all parameters are required, the last parameter can be "nil" if you want to remove the property
+    local changeInstance = Change("sectionName", "propertyName", "propertyValue")
 
 --]]
 
