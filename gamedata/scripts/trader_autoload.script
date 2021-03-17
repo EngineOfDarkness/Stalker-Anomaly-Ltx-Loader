@@ -1,0 +1,107 @@
+--[[
+
+    Author: EngineOfDarkness
+    
+    This work is licensed under the GPL-3.0 License 
+    
+    --------------------------------------------
+
+    A script based solution that allows modders to change some trader ltx properties without overwriting actual vanilla trader files
+    
+    See README.md for detailed examples
+    
+--]]
+
+local Ini               = require "gamedata\\scripts\\config\\Ini"
+local ChangesetLoader   = require "gamedata\\scripts\\config\\ChangesetLoader"
+local ChangeWriter      = require "gamedata\\scripts\\config\\ChangeWriter"
+
+local ChangesetLoaderInstance   = ChangesetLoader("*_trader_mod.script", "registerTraderLtxModifications")
+local ChangeWriterInstance      = ChangeWriter()
+
+-- ensure that the vanilla preset files are loaded first
+-- todo should I detect those dynamically (iterate over presets folder?)
+local function sortChangesetsImportantFirst(groupedChangesets)
+    local importantLtxFiles = {["items\\trade\\presets\\trade_discounts.ltx"] = 1, ["items\\trade\\presets\\trade_presets.ltx"] = 2}
+    local sortFunction      = function(changesetGroupA, changesetGroupB)
+        if importantLtxFiles[changesetGroupA.filename] then
+            return true
+        end
+        
+        return changesetGroupA.filename < changesetGroupB.filename
+    end
+    
+    table.sort(groupedChangesets, sortFunction)
+    
+    return groupedChangesets
+end
+
+local function getChangesetsGroupedByTraders()
+    local changesets        = ChangesetLoaderInstance:processChangesets()
+    local groupedChangesets = {}
+    local groups            = {}
+    local i                 = 1
+    
+    for _, changeset in ipairs(changesets) do
+        if changeset.ltx then
+            if not groups[changeset.ltx] then
+                groups[changeset.ltx] = i
+                i = i + 1
+            end
+            
+            local groupNumber = groups[changeset.ltx]
+        
+            if not groupedChangesets[groupNumber] then
+                groupedChangesets[groupNumber] = {["filename"] = changeset.ltx, ["changesets"] = {}}
+            end
+        
+            groupedChangesets[groupNumber]["changesets"][#groupedChangesets[groupNumber]["changesets"] + 1] = changeset
+        end
+    end
+    
+    groupedChangesets = sortChangesetsImportantFirst(groupedChangesets)
+    
+    return groupedChangesets
+end
+
+local function executeLoader()
+    local groupedTraderChangesets = getChangesetsGroupedByTraders()
+    
+    for _, traderChangesets in ipairs(groupedTraderChangesets) do
+        local traderIniInstance     = Ini(traderChangesets.filename)
+        local hasAppliedAnyChange   = false
+
+        traderIniInstance:storeBackup()
+    
+        for _, traderChangeset in ipairs(traderChangesets.changesets) do
+            for _, change in ipairs(traderChangeset.changes) do 
+                ChangeWriterInstance:writeChangeToIni(change, traderIniInstance)
+
+                hasAppliedAnyChange = true
+            end
+        end
+        
+        if hasAppliedAnyChange then
+            traderIniInstance:commitChanges()
+            traderIniInstance:reloadSystemIni()
+        end
+    end
+end
+
+local function on_console_execute(commandName)
+    if commandName == "quit" then 
+        local groupedTraderChangesets = getChangesetsGroupedByTraders()
+    
+        for _, traderChangesets in ipairs(groupedTraderChangesets) do
+            local traderIniInstance = Ini(traderChangesets.filename)
+            
+            traderIniInstance:restoreFromBackup()
+        end
+    end
+end
+
+function register()
+    RegisterScriptCallback("on_console_execute", on_console_execute)
+    
+    executeLoader()
+end

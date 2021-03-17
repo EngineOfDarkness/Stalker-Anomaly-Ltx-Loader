@@ -1,0 +1,26 @@
+--[[
+
+    Author: EngineOfDarkness
+    
+    This work is licensed under the GPL-3.0 License 
+    
+    --------------------------------------------
+
+    This autoloader can load custom scripts right when the game starts. The only thing you need to do is create a script which ends on "_autoload.script" and contains a function called "register"
+    
+    There are no parameters that will be passed to "register" and return values are not processed either
+    
+--]]
+
+local FileLoader = require "gamedata\\scripts\\config\\FileLoader"
+
+function register()
+    local callbackFunctionName  = "register"
+    local FileLoaderInstance    = FileLoader("*_autoload.script", callbackFunctionName)
+    local loaders               = FileLoaderInstance:loadFiles()
+    
+    for _, filename in ipairs(loaders) do
+        printf("AUTOLOADER: Executing %s.%s()", filename, callbackFunctionName)
+        _G[filename][callbackFunctionName]()
+    end
+end
