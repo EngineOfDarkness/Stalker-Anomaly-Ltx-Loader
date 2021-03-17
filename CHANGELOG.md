@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2021-03-17
 ### Added
 - `gamedata\scripts\config\File.lua`
     - centralizes some file related functions (e.g. returning the filename without extension, or just the extension of a given filename)
@@ -23,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 - Updated the `README.md`
+- Updated the `readme.txt` based on the `README.md`
 - `gamedata/scripts/ltx_autoload.script`
     - Renamed from `ltx_loader.script` to `ltx_autoload.script`
     - automatically called by `gamedata\scripts\autoloader.script`
