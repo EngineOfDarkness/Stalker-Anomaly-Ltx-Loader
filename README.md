@@ -4,6 +4,8 @@ A Lua based solution to change Stalker Anomaly LTX Files on the fly once the gam
 
 This Library Collects changes from several 3rd party scriptfiles and applies them once on game start.
 
+Protip: Use Mod Organizer 2 to install mods - if you use JSGME or Manual Installation, don't complain about the lenghty [Uninstall](#uninstall) process of this Library when it was in use. You have been warned.
+
 **Note this is a Pre-Release Version, so things are subject to change until 1.0.0 is done and as such Semantic Versioning (important for Mod Developers only) does not apply yet - this Library is a proof of concept for now**
 
 ## Table of Contents
@@ -105,7 +107,7 @@ Preferrably use JSGME or even better MO2 (Mod Organizer 2, at least Version 2.4 
 
 ##### JSGME or MO2
 
-Simply deactivate the Library and then see [Remove LTX Files](#remove-ltx-files)
+Deactivate the Library and then see [Remove LTX Files](#remove-ltx-files)
 
 ##### I installed everything manually
 
@@ -134,6 +136,7 @@ Notice the examples here are intentionally very verbose - you could just cram ev
 #### Modify system.ltx specific properties
 
 1. Create a .script file, for example `authorname_modname_system_mod.script` - the filename needs to end on `_system_mod.script`
+    - you can create as many different files (e.g. for organizational purposes) as you want
 3. Import both `Change.lua` (see [Change](#change)) and `Changeset.lua` (see [Changeset](#changeset)) by using require inside the file you just created
 ```lua
 local Change = require "gamedata\\scripts\\config\\Change"
@@ -164,6 +167,7 @@ end
 #### Modify trader ltx specific properties
 
 1. Create a .script file, for example `authorname_modname_trader_mod.script` - the filename needs to end on `_trader_mod.script`
+    - you can create as many different files (e.g. for organizational purposes) as you want
 3. Import both `Change.lua` (see [Change](#change)) and `Changeset.lua` (see [Changeset](#changeset)) by using require inside the file you just created
 ```lua
 local Change = require "gamedata\\scripts\\config\\Change"
@@ -190,6 +194,19 @@ function registerTraderLtxModifications()
 	local pdaV3 = Change("supplies_1", "device_pda_3", "1, 1")
 	
 	return Changeset({pdaV1, pdaV2, pdaV3}, "My Changeset Name", "items\\trade\\trade_stalker_sidorovich.ltx")
+end
+```
+
+But what if you want to change a file under `configs\scripts\` instead? Well simple
+
+```lua
+local Change = require "gamedata\\scripts\\config\\Change"
+local Changeset = require "gamedata\\scripts\\config\\Changeset"
+
+function registerTraderLtxModifications()
+	local someChange = Change("logic@bar_barman", "trade", "items\\trade\\some_file.ltx") --  if you "trade" with barman he would have no items, because that trade file does not exist in this example
+	
+	return Changeset({someChange}, "My Changeset Name", "scripts\\bar\\bar_barman.ltx")
 end
 ```
 
