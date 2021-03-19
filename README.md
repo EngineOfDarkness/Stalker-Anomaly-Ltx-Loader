@@ -1,12 +1,12 @@
-# Stalker-Anomaly-Ltx-Loader
+# Stalker-Anomaly-Ltx-Loader 0.2.0
 
 A Lua based solution to change Stalker Anomaly LTX Files on the fly once the game starts.
 
 This Library Collects changes from several 3rd party scriptfiles and applies them once on game start.
 
-Protip: Use Mod Organizer 2 to install mods - if you use JSGME or Manual Installation, don't complain about the lenghty [Uninstall](#uninstall) process of this Library when it was in use. You have been warned.
-
 **Note this is a Pre-Release Version, so things are subject to change until 1.0.0 is done and as such Semantic Versioning (important for Mod Developers only) does not apply yet - this Library is a proof of concept for now**
+
+If you have a problem, please copy the output of your Log and create an [Issue](https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues)
 
 ## Table of Contents
 
@@ -15,14 +15,19 @@ Protip: Use Mod Organizer 2 to install mods - if you use JSGME or Manual Install
     - [Mod Developers](#mod-developers)
 - [Savegame compatibility](#savegame-compatibility)
 - [Requirements](#requirements)
+    - [Mod Managers](#mod-managers)
     - [No other should overwrite `gamedata\configs\script.ltx`](#no-other-should-overwrite-gamedataconfigsscriptltx)
     - [LTX specific requirements](#ltx-specific-requirements)
 - [How to use](#how-to-use)
     - [For Endusers](#for-endusers)
         - [Install](#install)
+        - [Updating other Mods that don't use the Library](#updating-other-mods-that-dont-use-the-library)
         - [Uninstall](#uninstall)
             - [JSGME or MO2](#jsgme-or-mo2)
-            - [I installed everything manually](#i-installed-everything-manually)
+            - [Manual Installation](#manual-installation)
+        - [Remove LTX Files](#remove-ltx-files)
+            - [Mod Organizer](#mod-organizer)
+            - [JSGME or Manual Installation](#jsgme-or-manual-installation)
     - [For Mod Developers](#for-mod-developers)
         - [Modify system.ltx specific properties](#modify-systemltx-specific-properties)
         - [Modify trader ltx specific properties](#modify-trader-ltx-specific-properties)
@@ -31,21 +36,19 @@ Protip: Use Mod Organizer 2 to install mods - if you use JSGME or Manual Install
             - [Changeset](#changeset)
         - [Useful Side-Effect for Modders - Autoload Fix for certain Callbacks](#useful-side-effect-for-modders---autoload-fix-for-certain-callbacks)
 - [Roadmap](#roadmap)
-- [Remove LTX Files](#remove-ltx-files)
-    - [Mod Organizer](#mod-organizer)
-    - [JSGME or "I installed everything manually"](#jsgme-or-i-installed-everything-manually)
+- [Changelog](#changelog)
 - [How it works](#how-it-works)
 - [Donations](#donations) 
 
-## Who is this for
+## <a name="who-is-this-for"></a>Who is this for
 
-### Mod Users
+### <a name="mod-users"></a>Mod Users
 
 As an End-User you only need this Library if a Mod you downloaded actually requires you to install it.
 
 If you have no such mod installed, this Library does nothing and you dont need it.
 
-### Mod Developers
+### <a name="mod-developers"></a>Mod Developers
 
 Mod Developers who want to make changes to existing LTX files (vanilla or other mods) while being minimally invasive (so no more overwriting entire ltx files just to change a few properties) - thus improving mod cross-compatibility for mods that make use of this Library.
 
@@ -53,7 +56,7 @@ Currently works with LTX Files that are either registered through the system.ltx
 
 Mods that edit exactly the same properties of the same section still "conflict", albeit that here simply the last loaded mod wins (at least for now, see [Roadmap](/ROADMAP.md) )
 
-But PLEASE do NOT use this Library to add new items (aka "sections" - for example weapons). Vanilla Anomaly already has this feature since at least 1.5.1
+But PLEASE do NOT use this Library to add new items (aka "sections" - for example weapons). Vanilla Anomaly already has this feature since at least 1.5.1 (at least for items)
 
 **The comment in vanilla file `configs\items\items\base.ltx` reads as follows:**
 
@@ -64,58 +67,68 @@ But PLEASE do NOT use this Library to add new items (aka "sections" - for exampl
 ; it will be automatically included and won't cause conflict with other mods that add/edit items
 ```
 
-## Savegame compatibility
+## <a name="savegame-compatibility"></a>Savegame compatibility
 
 - A new Savegame may be required when installing - depends on what the Mods that make use of this Library do - please consult the Readmes of those or ask the Modauthor
 - A new Savegame may be required when uninstalling - depends on what the Mods that make use of this Library do - please consult the Readmes of those or ask the Modauthor
  
 This Library itself (without having any other Mods installed that make use of it) can be safely added / removed anytime (just follow the [Uninstall](#uninstall) instructions)
 
-## Requirements
+## <a name="requirements"></a>Requirements
 
-### No other should overwrite `gamedata\configs\script.ltx`
+In general, when I refer to something like "manual way" or "manual installation" I mean that you copied files manually into the Anomaly Directory without using JSGME or MO2.
+
+### <a name="mod-managers"></a>Mod Managers
+
+While you can generally use this Library with Manual Installations or JSGME, I do not recommend it due to the complex [Uninstall](#uninstall) or Troubleshooting process that it may require from you, the user.
+
+Mod Organizer 2 (Version 2.4 and up) is currently the easiest way to handle this (given that you only install Mods via MO2 and not manually aswell)
+
+### <a name="no-other-should-overwrite-gamedataconfigsscriptltx"></a>No other Mod should overwrite `gamedata\configs\script.ltx`
 
 **The ONLY vanilla file that is being shipped / overriden is `gamedata\configs\script.ltx` - this simply has added ONE entry at the very beginning of `class_registrators` which is `autoloader.register`**
 
 To my knowledge there is no addon for anomaly out there that touches this file (and is rarely touched itself), and there really is no need for any mod to do so currently. As such it is compatible with any other mod currently out there and will not conflict.
 
-### LTX specific requirements
+### <a name="ltx-specific-requirements"></a>LTX specific requirements
 
-If you need to install a mod that touches the `system.ltx` or any other LTX (like for example `items\trade\trade_stalker_sidorovich.ltx`, then you need to install that mod BEFORE you start the game with this Library installed for the FIRST TIME.
+If you need to install, remove or update a mod that touches LTX files, you are required to do the following if you have started the Game with my Library and Mods that use my Library at least once
 
-This is ABSOLUTELY required because my Library "copies" the vanilla LTX in question to use as a clean base to apply the changes to.
+- Stop the game
+- Follow [Remove LTX Files](#remove-ltx-files) for your use-case (MO2, JSGME or Manual Installation)
+- Install / Remove / Update your mods in question
+- Start the game again - the Library will now create `*.backup.ltx` and `*.temp.ltx` files based on your Installed / Removed / Updated LTX Files
 
-If you made a mistake with this, do the following
+This is required because my Library "copies" the vanilla / modded LTX in question on first startup to `*.backup.ltx` - this backup file will be used on subsequent starts as a baseline for the modifications.
 
-- Remove the files based on the following pattern from your `gamedata\configs` directory
-    - `*.backup.ltx`
-    - `*.temp.ltx`
-- Reinstall the LTX files from your mods
-- Start the game again - the Library will now create `*.backup.ltx` and `*.temp.ltx` files based on your modded LTX files
+The reason that the Library doesn't copy the the vanilla / modded LTX each gamestart is that at when you quit the game it writes back the vanilla / modded LTX from `*.backup.ltx`. However the problem arises when the game crashes - now the vanilla / modded LTX is not the "original" anymore but the one modified by the Library, which is why `*.backup.ltx` is used as a basefile.
 
-## How to use
+## <a name="how-to-use"></a>How to use
 
-### For Endusers
+### <a name="for-endusers"></a>For Endusers
 
-#### Install
+#### <a name="install"></a>Install
 
-Simply install into the Anomaly folder (where the "gamedata" folder resides) like you are used to with any other mod.
+Either use a Mod Manager like JSGME or MO2 or install into the Anomaly folder (where the "gamedata" folder resides) like any other addon.
 
-Preferrably use JSGME or even better MO2 (Mod Organizer 2, at least Version 2.4 or upwards is required for proper Anomaly support from the get go).
+#### <a name="updating-other-mods-that-dont-use-the-library"></a>Updating other Mods that don't use the Library
 
-#### Uninstall
+If you have other Mods installed that do not make use of this Library, it is required that you follow [LTX specific requirements](#ltx-specific-requirements) when you update those.
 
-##### JSGME or MO2
+This is to ensure that the Modifications this Library makes, is made on the correct ltx file.
 
-Deactivate the Library and then see [Remove LTX Files](#remove-ltx-files)
+#### <a name="uninstall"></a>Uninstall
 
-##### I installed everything manually
+##### <a name="jsgme-or-mo2"></a>JSGME or MO2
 
-If you did the archaic "I installed everything manually" way to install mods, you need to at least remove the following files (or better yet, start fresh - I mean that's what you get by doing it manually when there are better ways like JSGME or even better MO2)
+Deactivate the Library in your Mod Manager and then follow [Remove LTX Files](#remove-ltx-files) for your use-case
 
-- Follow the instructions for your case in [Remove LTX Files](#remove-ltx-files)
-- Remove `gamedata\configs\script.ltx` (this disables the autoloading and prevents it from recreating the system.ltx, technically you can stop here, unless you want to clean up properly)
-- To clean up, remove the following scriptfiles (they will be doing pretty much nothing if you've done step 2 though) 
+##### <a name="manual-installation"></a>Manual Installation
+
+If you installed mods the manual way, you need to either remove the following files or start with a fresh gamedata folder - whatever you feel more comfortable with.
+
+1. Remove
+    - `gamedata\configs\script.ltx`
     - `gamedata\scripts\config\Change.lua`
     - `gamedata\scripts\config\Changeset.lua`
     - `gamedata\scripts\config\ChangesetLoader.lua`
@@ -126,14 +139,51 @@ If you did the archaic "I installed everything manually" way to install mods, yo
     - `gamedata\scripts\autoloader.script`
     - `gamedata\scripts\ltx_autoload.script`
     - `gamedata\scripts\trader_autoload.script`
+2. Follow the instructions for your case in [Remove LTX Files](#remove-ltx-files)
+   
+#### <a name="remove-ltx-files"></a>Remove LTX Files
 
-### For Mod Developers
+##### <a name="mod-organizer"></a>Mod Organizer
 
-Install the Library like you would any other Mod (follow the above instructions basically)
+The LTX files will be at the bottom of the load order as part of a mod called `Overwrite`.
+
+In general among the vanilla file that was modified, there will be two more files with the following pattern (`*` would be the vanilla filename)
+
+- `*.backup.ltx`
+- `*.temp.ltx`
+
+If you have not installed mods manually into the Anomaly directory
+
+- Simply delete the `Overwrite` mod.
+
+If you have installed mods manually into the Anomaly directory
+
+- double-click `Overwrite` to bring up a filelist and manually delete all files with the pattern mentioned above
+- I also recomment deleting the vanilla files you modded in `Overwrite` and then reinstall the mods you installed manually afterwards
+
+There may be a third file (a cachefile) in there if you use the Anomaly debug mode which can be safely deleted aswell.
+
+##### <a name="jsgme-or-manual-installation"></a>JSGME or Manual Installation
+
+You need to manually go to your `gamedata\configs` directory and remove the files from there.
+
+- JSGME: Disable all Mods
+- Remove the files based on the following pattern from your `gamedata\configs` directory and all available subdirectories
+    1. `*.backup.ltx`
+    2. `*.temp.ltx`
+    3. Also delete the original file, e.g. if you delete `system.backup.ltx` and `system.temp.ltx` also delete `system.ltx`
+- JSGME: Re-Enable the Mods
+- Reinstall Mods you added manually to the Anomaly Directory
+
+### <a name="for-mod-developers"></a>For Mod Developers
+
+Install the Library like you would any other Mod (follow [Install](#install) basically)
 
 Notice the examples here are intentionally very verbose - you could just cram everything in the function into one line without using any variables, but that is not really good code (well at least if you try to make use of guidelines from e.g. "Clean Code: A Handbook of Agile Software Craftsmanship" to keep your code easy to read and maintain - hard to read / maintain code is not good code)
 
-#### Modify system.ltx specific properties
+If you have problems, the first thing you can do is check the Console (or the logfile in the directory `appdata\logs` if you quit the game already) - the Library generates Messages that start with `LTX-LIBRARY`.
+
+#### <a name="modify-systemltx-specific-properties"></a>Modify system.ltx specific properties
 
 1. Create a .script file, for example `authorname_modname_system_mod.script` - the filename needs to end on `_system_mod.script`
     - you can create as many different files (e.g. for organizational purposes) as you want
@@ -147,7 +197,7 @@ local Changeset = require "gamedata\\scripts\\config\\Changeset"
     1. `local switchDistance = Change("alife", "switch_distance", 20)`
     2. `local boltWeight = Change("bolt", "inv_weight", 1)`
 4. Now that you created the [Change](#change) "instances", you need to pass them to an instance of [Changeset](#changeset) and return said instance
-    1. `return Changeset({switchDistance, boltWeight}, "My Changeset Name")`
+    1. `return Changeset({switchDistance, boltWeight}, "My Unique Changeset Name")`
 6. Thats it, the changes will now be applied when you start the game. If you want to check if this file has been loaded you can take a look at the console / logfile - the loaded files (and errors, if there are any) will be shown.
 
 The complete example for `authorname_modname_system_mod.script` would look like this 
@@ -160,11 +210,11 @@ function registerSystemLtxModifications()
 	local switchDistance = Change("alife", "switch_distance", 20)
 	local boltWeight = Change("bolt", "inv_weight", 1)
 	
-	return Changeset({switchDistance, boltWeight}, "My Changeset Name")
+	return Changeset({switchDistance, boltWeight}, "My Unique Changeset Name")
 end
 ```
 
-#### Modify trader ltx specific properties
+#### <a name="modify-trader-ltx-specific-properties"></a>Modify trader ltx specific properties
 
 1. Create a .script file, for example `authorname_modname_trader_mod.script` - the filename needs to end on `_trader_mod.script`
     - you can create as many different files (e.g. for organizational purposes) as you want
@@ -179,7 +229,7 @@ local Changeset = require "gamedata\\scripts\\config\\Changeset"
     2. `local pdaV2 = Change("supplies_1", "device_pda_2", "1, 1")`
     3. `local pdaV3 = Change("supplies_1", "device_pda_3", "1, 1")`
 4. Now that you created the [Change](#change) "instances", you need to pass them to an instance of [Changeset](#changeset) with the optional last parameter pointing to the trader file and return said instance.
-    1. `return Changeset({pdaV1, pdaV2, pdaV3}, "My Changeset Name", "items\\trade\\trade_stalker_sidorovich.ltx")`
+    1. `return Changeset({pdaV1, pdaV2, pdaV3}, "My Unique Trader Changeset Name", "items\\trade\\trade_stalker_sidorovich.ltx")`
 6. Thats it, the changes will now be applied when you start a new game (for existing games this only updates when the Trader restocks). If you want to check if this file has been loaded you can take a look at the console / logfile - the loaded files (and errors, if there are any) will be shown.
 
 The complete example for `authorname_modname_trader_mod.script` would look like this 
@@ -193,7 +243,7 @@ function registerTraderLtxModifications()
 	local pdaV2 = Change("supplies_1", "device_pda_2", "1, 1")
 	local pdaV3 = Change("supplies_1", "device_pda_3", "1, 1")
 	
-	return Changeset({pdaV1, pdaV2, pdaV3}, "My Changeset Name", "items\\trade\\trade_stalker_sidorovich.ltx")
+	return Changeset({pdaV1, pdaV2, pdaV3}, "My Unique Trader Changeset Name", "items\\trade\\trade_stalker_sidorovich.ltx")
 end
 ```
 
@@ -206,13 +256,13 @@ local Changeset = require "gamedata\\scripts\\config\\Changeset"
 function registerTraderLtxModifications()
 	local someChange = Change("logic@bar_barman", "trade", "items\\trade\\some_file.ltx") --  if you "trade" with barman he would have no items, because that trade file does not exist in this example
 	
-	return Changeset({someChange}, "My Changeset Name", "scripts\\bar\\bar_barman.ltx")
+	return Changeset({someChange}, "My Unique Trader Changeset Name", "scripts\\bar\\bar_barman.ltx")
 end
 ```
 
-#### API Documentation
+#### <a name="api-documentation"></a>API Documentation
 
-##### Change
+##### <a name="change"></a>Change
 
 This "class" takes three required parameters
 
@@ -223,19 +273,19 @@ This "class" takes three required parameters
     - if you pass `nil` then the property will be removed, pass an empty string if you want the property to be empty.
     - **Handle removal with extra care, the inheriting behaviour of sections (e.g. `[myitem]:parent`) cannot be used at this point, because the `system.ltx` has already been processed, so if you remove a required property the game crashes even if the property is defined in the "parent" section**
 
-##### Changeset
+##### <a name="changeset"></a>Changeset
 
 This "class" takes two required parameters and one optional one
 
 1. `changes` (type: `table`, required)
     - this should contain a table with one or more [Change](#change) instances
 2. `changesetName` (type: `string`, required)
-    - a name that describes the changeset - will currently only be used in logs, but is still required. Try to keep this unique (e.g. something like "Authorname - Modname" or something like that
+    - a name that describes the changeset - will currently only be used in logs, but is still required. Try to keep this unique (e.g. something like "Authorname - Modname - XYZ" or something like that)
 3. `ltx` (type: `string`, optional)
     - if not given then the changes will be done on the system.ltx (so if you want to make changes that are contained within the system.ltx then this can be kept empty)
     - if given, the changes will be done on the specified ltx file, example `items\\trade\\trade_stalker_sidorovich.ltx`
 
-#### Useful Side-Effect for Modders - Autoload Fix for certain Callbacks
+#### <a name="useful-side-effect-for-modders---autoload-fix-for-certain-callbacks"></a>Useful Side-Effect for Modders - Autoload Fix for certain Callbacks
 
 As you may or may not know, Anomaly has a rudimentary way to "autoload" scriptfiles by adding a function called `on_game_start` to a custom script file and then using `RegisterScriptCallback` (see `axr_main.script` for available callbacks)
 
@@ -262,43 +312,17 @@ The reason this works is because the `autoloader.script` included in `gamedata\c
 
 A proper fix to the callback System would need to be done in vanilla anomaly (that is not in the scope of this project), but at that point the way the callback system works should probably be refactored aswell.
 
-What do I mean? For example if two Authors want to create NEW Callbacks for their Mods (so 3rd parties can extend their mods) those two Authors currently have to MANUALLY edit `axr_main.script` thus having a hard conflict (aka one of the two mod authors needs to maintain patches). This of course gets worse the more mod authors want to add their own callbacks.
+What do I mean by refactoring? For example if two Authors want to create NEW Callbacks for their Mods (so 3rd parties can extend their mods through the use of callbacks) those two Authors currently have to MANUALLY edit `axr_main.script` thus having a hard conflict (one of the two mod authors needs to maintain compatibility patches for this file). This of course gets worse the more mod authors want to add their own callbacks.
 
-## Roadmap
+## <a name="changelog"></a>Changelog
+
+See [Changelog here](https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/blob/main/CHANGELOG.md)
+
+## <a name="roadmap"></a>Roadmap
 
 See [Roadmap](/ROADMAP.md)
 
-## Remove LTX Files
-
-In general, this mod creates
-
-- Remove the files based on the following pattern from your `gamedata\configs` directory
-    - `*.backup.ltx`
-    - `*.temp.ltx`
-- Reinstall the LTX files from your mods
-- Start the game again - the Library will now create `*.backup.ltx` and `*.temp.ltx` files based on your modded LTX files
-
-### Mod Organizer
-
-The LTX files will be at the bottom of the load order as part of a mod called `Overwrite`.
-
-If you know you have no manually added files, Overwrite should only contain files created by the Library - these can be safely deleted assuming you have no mods installed that make changes inside the files themselves
-
-You can either double-click `Overwrite` to bring up a filelist and manually delete these files, or if you are SURE there are no mod files in there, simply delete the `Overwrite` mod.
-
-There may be a third file (a cachefile) in there if you use the Anomaly debug mode which can be safely deleted aswell.
-
-### JSGME or "I installed everything manually"
-
-You need to manually go to your `gamedata\configs` directory and remove the LTX files from there.
-
-- Remove the files based on the following pattern from your `gamedata\configs` directory
-    1. `*.backup.ltx`
-    2. `*.temp.ltx`
-    3. Also delete the original file, e.g. if you delete `system.backup.ltx` and `system.temp.ltx` also delete `system.ltx`
-- **Reinstall the LTX files (from other mods) you deleted them in step 3**
-
-## How it works
+## <a name="how-it-works"></a>How it works
 
 Due to the additional file being "registered" in `gamedata\configs\script.ltx`  the function `register` in scriptfile `autoloader.script` is executed on game start (when entering the main menu, so before loading or starting any game)
 
@@ -306,6 +330,7 @@ The `autoloader.script` then searches for scripts named `*_autoload.script` and 
 
 - `ltx_autoload.script`
     - Autoloads all scriptfiles named `*_system_mod.script` and executes the function `registerSystemLtxModifications` inside them
+    - Currently Ignores the 3rd parameter (which LTX to modify) of any [Changeset](#changeset)
 - `trader_autoload.script`
     - Autoloads all scriptfiles named `*_trader_mod.script` and executes the function `registerTraderLtxModifications` inside them
     - Requires a [Changeset](#changeset) with the third parameter being defined
@@ -327,6 +352,6 @@ Finally both autoloaders clear the ini cache and reload the system.ini
 
 When you quit the game, the original LTX files will be restored from `*.backup.ltx` - the `*.temp.ltx` files remain as is (but get overwritten anyway on subsequent game starts)
 
-## Donations
+## <a name="donations"></a>Donations
 
 Please check my [Donations Repository](https://github.com/EngineOfDarkness/donations) for options to donate
