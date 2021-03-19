@@ -18,6 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Removed
 - `readme.txt`
     - bothersome to maintain, has no formatting. Replaced with html version
+    
+### Fixed
+- Won't work if the game is not launched from the Launcher (e.g. when launching from the EXE files in the bin\ subdirectory)
+    - See https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/8
 
 ## [0.2.0] - 2021-03-17
 ### Added
