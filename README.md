@@ -1,4 +1,4 @@
-# Stalker-Anomaly-Ltx-Loader 0.2.0
+# Stalker-Anomaly-Ltx-Loader 0.2.1
 
 A Lua based solution to change Stalker Anomaly LTX Files on the fly once the game starts.
 
@@ -16,7 +16,7 @@ If you have a problem, please copy the output of your Log and create an [Issue](
 - [Savegame compatibility](#savegame-compatibility)
 - [Requirements](#requirements)
     - [Mod Managers](#mod-managers)
-    - [No other should overwrite `gamedata\configs\script.ltx`](#no-other-should-overwrite-gamedataconfigsscriptltx)
+    - [No other mod should overwrite `gamedata\configs\script.ltx`](#no-other-mod-should-overwrite-gamedataconfigsscriptltx)
     - [LTX specific requirements](#ltx-specific-requirements)
 - [How to use](#how-to-use)
     - [For Endusers](#for-endusers)
@@ -84,7 +84,7 @@ While you can generally use this Library with Manual Installations or JSGME, I d
 
 Mod Organizer 2 (Version 2.4 and up) is currently the easiest way to handle this (given that you only install Mods via MO2 and not manually aswell)
 
-### <a name="no-other-should-overwrite-gamedataconfigsscriptltx"></a>No other Mod should overwrite `gamedata\configs\script.ltx`
+### <a name="no-other-mod-should-overwrite-gamedataconfigsscriptltx"></a>No other Mod should overwrite `gamedata\configs\script.ltx`
 
 **The ONLY vanilla file that is being shipped / overriden is `gamedata\configs\script.ltx` - this simply has added ONE entry at the very beginning of `class_registrators` which is `autoloader.register`**
 
@@ -97,11 +97,11 @@ If you need to install, remove or update a mod that touches LTX files, you are r
 - Stop the game
 - Follow [Remove LTX Files](#remove-ltx-files) for your use-case (MO2, JSGME or Manual Installation)
 - Install / Remove / Update your mods in question
-- Start the game again - the Library will now create `*.backup.ltx` and `*.temp.ltx` files based on your Installed / Removed / Updated LTX Files
+- Start the game again - the Library will now create `*.backup` and `*.temp` files based on your Installed / Removed / Updated LTX Files
 
-This is required because my Library "copies" the vanilla / modded LTX in question on first startup to `*.backup.ltx` - this backup file will be used on subsequent starts as a baseline for the modifications.
+This is required because my Library "copies" the vanilla / modded LTX in question on first startup to `*.backup` - this backup file will be used on subsequent starts as a baseline for the modifications.
 
-The reason that the Library doesn't copy the the vanilla / modded LTX each gamestart is that at when you quit the game it writes back the vanilla / modded LTX from `*.backup.ltx`. However the problem arises when the game crashes - now the vanilla / modded LTX is not the "original" anymore but the one modified by the Library, which is why `*.backup.ltx` is used as a basefile.
+The reason that the Library doesn't copy the the vanilla / modded LTX each gamestart is that at when you quit the game it writes back the vanilla / modded LTX from `*.backup`. However the problem arises when the game crashes - now the vanilla / modded LTX is not the "original" anymore but the one modified by the Library, which is why `*.backup` is used as a basefile.
 
 ## <a name="how-to-use"></a>How to use
 
@@ -149,8 +149,8 @@ The LTX files will be at the bottom of the load order as part of a mod called `O
 
 In general among the vanilla file that was modified, there will be two more files with the following pattern (`*` would be the vanilla filename)
 
-- `*.backup.ltx`
-- `*.temp.ltx`
+- `*.backup`
+- `*.temp`
 
 If you have not installed mods manually into the Anomaly directory
 
@@ -169,9 +169,9 @@ You need to manually go to your `gamedata\configs` directory and remove the file
 
 - JSGME: Disable all Mods
 - Remove the files based on the following pattern from your `gamedata\configs` directory and all available subdirectories
-    1. `*.backup.ltx`
-    2. `*.temp.ltx`
-    3. Also delete the original file, e.g. if you delete `system.backup.ltx` and `system.temp.ltx` also delete `system.ltx`
+    1. `*.backup`
+    2. `*.temp`
+    3. Also delete the original file, e.g. if you delete `system.backup` and `system.temp` also delete `system.ltx`
 - JSGME: Re-Enable the Mods
 - Reinstall Mods you added manually to the Anomaly Directory
 
@@ -341,16 +341,16 @@ Basically:
 - [Changeset](#changeset) would be similar to a Collection
 - [Change](#change) would be an Item in a Collection
 
-Both autoloaders ensure that LTX files which are modified will be backed up - said backup will be called `*.backup.ltx`.
+Both autoloaders ensure that LTX files which are modified will be backed up - said backup will be called `*.backup`.
 
-When the autoloaders apply the changes, the Backup will be copied to a new file called `*.temp.ltx` - this is the file the changes will be applied to.
+When the autoloaders apply the changes, the Backup will be copied to a new file called `*.temp` - this is the file the changes will be applied to.
 This file will be recreated everytime you start the game (to ensure the Changes are always written to the last "known good" vanilla / modded LTX that was backed up)
 
-When the [Changesets](#changeset) have been completely applied, the `*.temp.ltx` is saved and THEN will overwrite the original vanilla file.
+When the [Changesets](#changeset) have been completely applied, the `*.temp` is saved and THEN will overwrite the original vanilla file.
 
 Finally both autoloaders clear the ini cache and reload the system.ini
 
-When you quit the game, the original LTX files will be restored from `*.backup.ltx` - the `*.temp.ltx` files remain as is (but get overwritten anyway on subsequent game starts)
+When you quit the game, the original LTX files will be restored from `*.backup` - the `*.temp` files remain as is (but get overwritten anyway on subsequent game starts)
 
 ## <a name="donations"></a>Donations
 

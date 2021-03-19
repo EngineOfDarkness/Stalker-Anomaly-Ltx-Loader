@@ -41,12 +41,11 @@ local function construct(_, originalName, backupName, tempName)
     originalName = originalName or "system.ltx"
     
     local fileInstance      = File(originalName)
-    local fileExtension     = fileInstance:getExtension()
     local fileLessExtension = fileInstance:removeExtension()
 
     newIni.originalName     = originalName
-    newIni.backupName       = backupName or fileLessExtension .. ".backup." .. fileExtension
-    newIni.tempName         = tempName or fileLessExtension .. ".temp." .. fileExtension
+    newIni.backupName       = backupName or fileLessExtension .. ".backup"
+    newIni.tempName         = tempName or fileLessExtension .. ".temp"
     newIni.fileSystem       = getFS()
     newIni.gameConfigPath   = newIni.fileSystem:update_path("$game_config$", "")
     newIni.originalPath     = newIni.gameConfigPath .. newIni.originalName

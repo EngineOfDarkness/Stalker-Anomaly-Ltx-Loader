@@ -1,4 +1,4 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title></title></head><body><h1>Stalker-Anomaly-Ltx-Loader 0.2.0</h1>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title></title></head><body><h1>Stalker-Anomaly-Ltx-Loader 0.2.1</h1>
 
 <p>A Lua based solution to change Stalker Anomaly LTX Files on the fly once the game starts.</p>
 
@@ -22,7 +22,7 @@
 
 <ul>
 <li><a href="#mod-managers">Mod Managers</a></li>
-<li><a href="#no-other-should-overwrite-gamedataconfigsscriptltx">No other should overwrite <code>gamedata\configs\script.ltx</code></a></li>
+<li><a href="#no-other-mod-should-overwrite-gamedataconfigsscriptltx">No other Mod should overwrite <code>gamedata\configs\script.ltx</code></a></li>
 <li><a href="#ltx-specific-requirements">LTX specific requirements</a></li>
 </ul></li>
 <li><a href="#how-to-use">How to use</a>
@@ -111,7 +111,7 @@
 
 <p>Mod Organizer 2 (Version 2.4 and up) is currently the easiest way to handle this (given that you only install Mods via MO2 and not manually aswell)</p>
 
-<h3><a name="no-other-should-overwrite-gamedataconfigsscriptltx"></a>No other Mod should overwrite <code>gamedata\configs\script.ltx</code></h3>
+<h3><a name="no-other-mod-should-overwrite-gamedataconfigsscriptltx"></a>No other Mod should overwrite <code>gamedata\configs\script.ltx</code></h3>
 
 <p><strong>The ONLY vanilla file that is being shipped / overriden is <code>gamedata\configs\script.ltx</code> - this simply has added ONE entry at the very beginning of <code>class_registrators</code> which is <code>autoloader.register</code></strong></p>
 
@@ -125,12 +125,12 @@
 <li>Stop the game</li>
 <li>Follow <a href="#remove-ltx-files">Remove LTX Files</a> for your use-case (MO2, JSGME or Manual Installation)</li>
 <li>Install / Remove / Update your mods in question</li>
-<li>Start the game again - the Library will now create <code>*.backup.ltx</code> and <code>*.temp.ltx</code> files based on your Installed / Removed / Updated LTX Files</li>
+<li>Start the game again - the Library will now create <code>*.backup</code> and <code>*.temp</code> files based on your Installed / Removed / Updated LTX Files</li>
 </ul>
 
-<p>This is required because my Library &ldquo;copies&rdquo; the vanilla / modded LTX in question on first startup to <code>*.backup.ltx</code> - this backup file will be used on subsequent starts as a baseline for the modifications.</p>
+<p>This is required because my Library &ldquo;copies&rdquo; the vanilla / modded LTX in question on first startup to <code>*.backup</code> - this backup file will be used on subsequent starts as a baseline for the modifications.</p>
 
-<p>The reason that the Library doesn&#39;t copy the the vanilla / modded LTX each gamestart is that at when you quit the game it writes back the vanilla / modded LTX from <code>*.backup.ltx</code>. However the problem arises when the game crashes - now the vanilla / modded LTX is not the &ldquo;original&rdquo; anymore but the one modified by the Library, which is why <code>*.backup.ltx</code> is used as a basefile.</p>
+<p>The reason that the Library doesn&#39;t copy the the vanilla / modded LTX each gamestart is that at when you quit the game it writes back the vanilla / modded LTX from <code>*.backup</code>. However the problem arises when the game crashes - now the vanilla / modded LTX is not the &ldquo;original&rdquo; anymore but the one modified by the Library, which is why <code>*.backup</code> is used as a basefile.</p>
 
 <h2><a name="how-to-use"></a>How to use</h2>
 
@@ -184,8 +184,8 @@
 <p>In general among the vanilla file that was modified, there will be two more files with the following pattern (<code>*</code> would be the vanilla filename)</p>
 
 <ul>
-<li><code>*.backup.ltx</code></li>
-<li><code>*.temp.ltx</code></li>
+<li><code>*.backup</code></li>
+<li><code>*.temp</code></li>
 </ul>
 
 <p>If you have not installed mods manually into the Anomaly directory</p>
@@ -212,9 +212,9 @@
 <li>Remove the files based on the following pattern from your <code>gamedata\configs</code> directory and all available subdirectories
 
 <ol>
-<li><code>*.backup.ltx</code></li>
-<li><code>*.temp.ltx</code></li>
-<li>Also delete the original file, e.g. if you delete <code>system.backup.ltx</code> and <code>system.temp.ltx</code> also delete <code>system.ltx</code></li>
+<li><code>*.backup</code></li>
+<li><code>*.temp</code></li>
+<li>Also delete the original file, e.g. if you delete <code>system.backup</code> and <code>system.temp</code> also delete <code>system.ltx</code></li>
 </ol></li>
 <li>JSGME: Re-Enable the Mods</li>
 <li>Reinstall Mods you added manually to the Anomaly Directory</li>
@@ -429,16 +429,16 @@ end
 - <a href="#changeset">Changeset</a> would be similar to a Collection
 - <a href="#change">Change</a> would be an Item in a Collection</p>
 
-<p>Both autoloaders ensure that LTX files which are modified will be backed up - said backup will be called <code>*.backup.ltx</code>.</p>
+<p>Both autoloaders ensure that LTX files which are modified will be backed up - said backup will be called <code>*.backup</code>.</p>
 
-<p>When the autoloaders apply the changes, the Backup will be copied to a new file called <code>*.temp.ltx</code> - this is the file the changes will be applied to.
+<p>When the autoloaders apply the changes, the Backup will be copied to a new file called <code>*.temp</code> - this is the file the changes will be applied to.
 This file will be recreated everytime you start the game (to ensure the Changes are always written to the last &ldquo;known good&rdquo; vanilla / modded LTX that was backed up)</p>
 
-<p>When the <a href="#changeset">Changesets</a> have been completely applied, the <code>*.temp.ltx</code> is saved and THEN will overwrite the original vanilla file.</p>
+<p>When the <a href="#changeset">Changesets</a> have been completely applied, the <code>*.temp</code> is saved and THEN will overwrite the original vanilla file.</p>
 
 <p>Finally both autoloaders clear the ini cache and reload the system.ini</p>
 
-<p>When you quit the game, the original LTX files will be restored from <code>*.backup.ltx</code> - the <code>*.temp.ltx</code> files remain as is (but get overwritten anyway on subsequent game starts)</p>
+<p>When you quit the game, the original LTX files will be restored from <code>*.backup</code> - the <code>*.temp</code> files remain as is (but get overwritten anyway on subsequent game starts)</p>
 
 <h2><a name="donations"></a>Donations</h2>
 

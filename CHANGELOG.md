@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2021-03-19
 ### Added
 - `README-Stalker-Anomaly-Ltx-Loader.html`
     - is a HTML version of `README.md` that replaces the `readme.txt` and will be in the "release" archive aswell
@@ -14,13 +15,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     - Rewritten some parts to be less snarky against people who want to keep using Manual Installation methods or JSGME instead of MO2
     - Moved some sections around to make more sense (when reading top - bottom)
     - Some further Detail on what Action is required with regards to LTX files when a user wants to Add / Update / Remove LTX files while the Library is in use
+    - renamed `*.backup.ltx` to `*.backup` and `*.temp.ltx` to `*.temp`
+- `gamedata\scripts\config\Ini.lua`
+    - removed the `fileExtension` (e.g. `ltx`) from the `*.backup` and `*.temp` files to avoid possible future issues with Anomalys LTX autoloading
 
 ### Removed
 - `readme.txt`
     - bothersome to maintain, has no formatting. Replaced with html version
     
 ### Fixed
-- Won't work if the game is not launched from the Launcher (e.g. when launching from the EXE files in the bin\ subdirectory)
+- Issue 8: "Won't work if the game is not launched from the Launcher"
     - See https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/8
 
 ## [0.2.0] - 2021-03-17
