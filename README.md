@@ -16,7 +16,7 @@ If you have a problem, please copy the output of your Log and create an [Issue](
 - [Savegame compatibility](#savegame-compatibility)
 - [Requirements](#requirements)
     - [Mod Managers](#mod-managers)
-    - [No other should overwrite `gamedata\configs\script.ltx`](#no-other-should-overwrite-gamedataconfigsscriptltx)
+    - [No other mod should overwrite `gamedata\configs\script.ltx`](#no-other-mod-should-overwrite-gamedataconfigsscriptltx)
     - [LTX specific requirements](#ltx-specific-requirements)
 - [How to use](#how-to-use)
     - [For Endusers](#for-endusers)
@@ -84,7 +84,7 @@ While you can generally use this Library with Manual Installations or JSGME, I d
 
 Mod Organizer 2 (Version 2.4 and up) is currently the easiest way to handle this (given that you only install Mods via MO2 and not manually aswell)
 
-### <a name="no-other-should-overwrite-gamedataconfigsscriptltx"></a>No other Mod should overwrite `gamedata\configs\script.ltx`
+### <a name="no-other-mod-should-overwrite-gamedataconfigsscriptltx"></a>No other Mod should overwrite `gamedata\configs\script.ltx`
 
 **The ONLY vanilla file that is being shipped / overriden is `gamedata\configs\script.ltx` - this simply has added ONE entry at the very beginning of `class_registrators` which is `autoloader.register`**
 
