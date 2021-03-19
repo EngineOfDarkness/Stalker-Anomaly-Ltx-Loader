@@ -12,6 +12,9 @@
     
 --]]
 
+-- register Anomaly root folder as package path so that launching from Launcher or exe files in the bin\ subdirectory doesn't create problems with relative require paths
+package.path = package.path .. string.format("%s?.lua;", getFS():update_path("$fs_root$", ""))
+
 local FileLoader = require "gamedata\\scripts\\config\\FileLoader"
 
 function register()
