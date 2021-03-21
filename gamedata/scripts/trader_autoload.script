@@ -90,7 +90,7 @@ local function executeLoader()
         
         if hasAppliedAnyChange then
             traderIniInstance:commitChanges()
-            traderIniInstance:reloadSystemIni()
+            SetEvent("reloadIniSysRequired", true)
         end
     end
 end
