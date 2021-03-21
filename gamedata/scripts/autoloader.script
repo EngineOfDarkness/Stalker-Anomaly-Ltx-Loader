@@ -26,4 +26,11 @@ function register()
         printf("AUTOLOADER: Executing %s.%s()", filename, callbackFunctionName)
         _G[filename][callbackFunctionName]()
     end
+    
+    if GetEvent("reloadIniSysRequired") then
+        printf("LTX-LIBRARY: Reloading and Clearing ini cache")
+        reload_ini_sys()
+        clear_ini_cache(ini_sys)
+        SetEvent("reloadIniSysRequired", nil)
+    end
 end

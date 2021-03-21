@@ -51,7 +51,7 @@ local function executeLoader()
 
         if hasAppliedAnyChange then
             SystemIniInstance:commitChanges()
-            SystemIniInstance:reloadSystemIni()
+            SetEvent("reloadIniSysRequired", true)
         end
     end
 end
