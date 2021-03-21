@@ -32,7 +32,7 @@ local function sortChangesetsImportantFirst(groupedChangesets)
         end
         
         if importantA and importantB then
-            return importantLtxFiles[changesetGroupA.filename] < importantLtxFiles[changesetGroupB.filename]
+            return importantA < importantB
         end
         
         return changesetGroupA.filename < changesetGroupB.filename
