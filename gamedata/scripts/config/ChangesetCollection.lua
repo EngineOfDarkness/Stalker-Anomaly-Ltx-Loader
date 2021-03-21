@@ -21,24 +21,30 @@
 local ChangesetCollection     = {}
 ChangesetCollection.__index   = ChangesetCollection
 
+--- private methods
+
+local function validate(self)
+    assert(type(self.changesets) == "table", "ChangesetCollection can only work with tables")
+    
+    for _, changeset in ipairs(self.changesets) do
+        assert(type(changeset) == "table" and type(changeset.changes) == "table", "ChangesetCollection can only contain changesets")
+    end
+end
+
 local function construct(_, changesets)
     local newChangesetCollection = {}
     setmetatable(newChangesetCollection, ChangesetCollection)
 
     newChangesetCollection.changesets = changesets
     
+    validate(newChangesetCollection)
+    
     return newChangesetCollection
 end
 
-setmetatable(ChangesetCollection, {__call = construct})
+--- public methods
 
-function ChangesetCollection:validate()
-    assert(type(self.changesets) == "table", "ChangesetCollection can only work with tables")
-    
-    for _, changeset in ipairs(self.changesets) do
-        assert(changeset and type(changeset.changes) == "table", "ChangesetCollection can only contain changesets")
-    end
-end
+setmetatable(ChangesetCollection, {__call = construct})
 
 function ChangesetCollection:extractChangesets(extractFunction)
     assert(type(extractFunction) == "function", "extractChangesets requires a function, example: 'extractChangesets(function(extractedChangeset) ... end)'")
