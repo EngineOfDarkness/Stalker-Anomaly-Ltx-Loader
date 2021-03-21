@@ -24,8 +24,15 @@ local ChangeWriterInstance      = ChangeWriter()
 local function sortChangesetsImportantFirst(groupedChangesets)
     local importantLtxFiles = {["items\\trade\\presets\\trade_discounts.ltx"] = 1, ["items\\trade\\presets\\trade_presets.ltx"] = 2}
     local sortFunction      = function(changesetGroupA, changesetGroupB)
-        if importantLtxFiles[changesetGroupA.filename] then
+        local importantA = importantLtxFiles[changesetGroupA.filename]
+        local importantB = importantLtxFiles[changesetGroupB.filename]
+    
+        if importantA and not importantB then
             return true
+        end
+        
+        if importantA and importantB then
+            return importantLtxFiles[changesetGroupA.filename] < importantLtxFiles[changesetGroupB.filename]
         end
         
         return changesetGroupA.filename < changesetGroupB.filename

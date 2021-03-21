@@ -55,13 +55,26 @@ function ChangesetLoader:loadChangesets()
     for _, filename in ipairs(loadedScripts) do
         local changeset = _G[filename][self.callbackFunctionName]()
 
-        if self:isChangesetValid(changeset, filename) then
+        if self:isChangeset(changeset) and self:isChangesetValid(changeset, filename) then
             printf("LTX-LIBRARY: Registered changes from '%s'", changeset.name)
             validChangesets[#validChangesets+1] = changeset
+        end
+        
+        if self:isChangesetCollection(changeset) then
+            changeset:extractChangesets(function(extractedChangeset)
+                if self:isChangesetValid(extractedChangeset, filename) then
+                    printf("LTX-LIBRARY: Registered changes from '%s'", extractedChangeset.name)
+                    validChangesets[#validChangesets+1] = extractedChangeset
+                end
+            end)
         end
     end
 
     return validChangesets
+end
+
+function ChangesetLoader:isChangeset(changeset)
+    return changeset and type(changeset.changes) == "table"
 end
 
 function ChangesetLoader:isChangesetValid(changeset, filename)
@@ -83,6 +96,10 @@ function ChangesetLoader:isChangesetValid(changeset, filename)
     end
 
     return true
+end
+
+function ChangesetLoader:isChangesetCollection(changeset)
+    return changeset and type(changeset.extractChangesets) == "function"
 end
 
 return ChangesetLoader
