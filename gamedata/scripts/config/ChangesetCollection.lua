@@ -24,10 +24,15 @@ ChangesetCollection.__index   = ChangesetCollection
 --- private methods
 
 local function validate(self)
-    assert(type(self.changesets) == "table", "ChangesetCollection can only work with tables")
+    if type(self.changesets) ~= "table" then
+        self:addError("ChangesetCollection can only work with tables")
+        return
+    end
     
-    for _, changeset in ipairs(self.changesets) do
-        assert(type(changeset) == "table" and type(changeset.changes) == "table", "ChangesetCollection can only contain changesets")
+    for index, changeset in ipairs(self.changesets) do
+        if type(changeset) ~= "table" or type(changeset.changes) ~= "table" then
+            self:addError(string.format("Index %s in the ChangesetCollection is not a Changeset", index))
+        end
     end
 end
 
@@ -35,7 +40,8 @@ local function construct(_, changesets)
     local newChangesetCollection = {}
     setmetatable(newChangesetCollection, ChangesetCollection)
 
-    newChangesetCollection.changesets = changesets
+    newChangesetCollection.changesets   = changesets
+    newChangesetCollection.errors       = {}
     
     validate(newChangesetCollection)
     
@@ -52,6 +58,14 @@ function ChangesetCollection:extractChangesets(extractFunction)
     for _, changeset in ipairs(self.changesets) do
         extractFunction(changeset)
     end
+end
+
+function ChangesetCollection:addError(message)
+    self.errors[#self.errors + 1] = message
+end
+
+function ChangesetCollection:isValid()
+    return #self.errors == 0
 end
 
 return ChangesetCollection

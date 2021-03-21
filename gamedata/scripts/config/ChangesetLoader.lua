@@ -60,7 +60,7 @@ function ChangesetLoader:loadChangesets()
             validChangesets[#validChangesets+1] = changeset
         end
         
-        if self:isChangesetCollection(changeset) then
+        if self:isChangesetCollection(changeset) and self:isChangesetCollectionValid(changeset, filename) then
             changeset:extractChangesets(function(extractedChangeset)
                 if self:isChangesetValid(extractedChangeset, filename) then
                     printf("LTX-LIBRARY: Registered changes from '%s'", extractedChangeset.name)
@@ -98,8 +98,29 @@ function ChangesetLoader:isChangesetValid(changeset, filename)
     return true
 end
 
-function ChangesetLoader:isChangesetCollection(changeset)
-    return changeset and type(changeset.extractChangesets) == "function"
+function ChangesetLoader:isChangesetCollection(changesetCollection)
+    return type(changesetCollection) == "table" and type(changesetCollection.extractChangesets) == "function"
+end
+
+function ChangesetLoader:isChangesetCollectionValid(changesetCollection, filename)
+    if not changesetCollection or type(changesetCollection.extractChangesets) ~= "function" then
+        printe("LTX-LIBRARY: ERROR: Return value of '%s' is not a ChangesetCollection instance, please see the readme section for 'ChangesetCollection', modification will be skipped", filename)
+        return false
+    end
+    
+    if not changesetCollection:isValid() then
+        printe("LTX-LIBRARY: ERROR: The ChangesetCollection from filename '%s' has the following errors, modifications will be skipped", filename)
+
+        local allChangesetCollectionErrors = changesetCollection.errors
+
+        for errorIndex, errorMessage in ipairs(allChangesetCollectionErrors) do
+            printe(" > " .. errorMessage)
+        end
+
+        return false
+    end
+
+    return true
 end
 
 return ChangesetLoader
