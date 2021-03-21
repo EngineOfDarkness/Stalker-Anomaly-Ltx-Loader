@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 ### Added
-- Issue 8: "Allow Changesets to be nested one level"
+- Issue 13: "Allow Changesets to be nested one level"
     - See https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/13
     - `gamedata\scripts\config\ChangesetCollection.lua`
         - Can be used to return multiple Changesets from a single Scriptfile
