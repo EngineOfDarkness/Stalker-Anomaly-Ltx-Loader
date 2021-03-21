@@ -31,9 +31,11 @@ If you have a problem, please copy the output of your Log and create an [Issue](
     - [For Mod Developers](#for-mod-developers)
         - [Modify system.ltx specific properties](#modify-systemltx-specific-properties)
         - [Modify trader ltx specific properties](#modify-trader-ltx-specific-properties)
+        - [Returning multiple Changesets from a single Scriptfile](#returning-multiple-changesets-from-a-single-scriptfile)
         - [API Documentation](#api-documentation)
             - [Change](#change)
             - [Changeset](#changeset)
+            - [ChangesetCollection](#changesetcollection)
         - [Useful Side-Effect for Modders - Autoload Fix for certain Callbacks](#useful-side-effect-for-modders---autoload-fix-for-certain-callbacks)
 - [Roadmap](#roadmap)
 - [Changelog](#changelog)
@@ -131,6 +133,7 @@ If you installed mods the manual way, you need to either remove the following fi
     - `gamedata\configs\script.ltx`
     - `gamedata\scripts\config\Change.lua`
     - `gamedata\scripts\config\Changeset.lua`
+    - `gamedata\scripts\config\ChangesetCollection.lua`
     - `gamedata\scripts\config\ChangesetLoader.lua`
     - `gamedata\scripts\config\ChangeWriter.lua`
     - `gamedata\scripts\config\File.lua`
@@ -260,6 +263,29 @@ function registerTraderLtxModifications()
 end
 ```
 
+#### <a name="returning-multiple-changesets-from-a-single-scriptfile"></a>Returning multiple Changesets from a single Scriptfile
+
+This can be done by using the [ChangesetCollection](#changesetcollection)
+
+Example based on the Trader Files
+
+```lua
+local Change = require "gamedata\\scripts\\config\\Change"
+local Changeset = require "gamedata\\scripts\\config\\Changeset"
+local ChangesetCollection = require "gamedata\\scripts\\config\\ChangesetCollection"
+
+function registerTraderLtxModifications()
+	local pdaV1 = Change("supplies_1", "device_pda_1", nil)
+	local pdaV2 = Change("supplies_1", "device_pda_2", "1, 1")
+	local pdaV3 = Change("supplies_1", "device_pda_3", "1, 1")
+    
+    local ChangesetA = Changeset({pdaV1}, "My Unique Sidorovich Changeset Name", "items\\trade\\trade_stalker_sidorovich.ltx")
+    local ChangesetB = Changeset({pdaV2, pdaV3}, "My Unique Barman Changeset Name", "items\\trade\\bar_barman.ltx")
+	
+	return ChangesetCollection({ChangesetA, ChangesetB})
+end
+```
+
 #### <a name="api-documentation"></a>API Documentation
 
 ##### <a name="change"></a>Change
@@ -284,6 +310,13 @@ This "class" takes two required parameters and one optional one
 3. `ltx` (type: `string`, optional)
     - if not given then the changes will be done on the system.ltx (so if you want to make changes that are contained within the system.ltx then this can be kept empty)
     - if given, the changes will be done on the specified ltx file, example `items\\trade\\trade_stalker_sidorovich.ltx`
+    
+##### <a name="changesetcollection"></a>ChangesetCollection
+
+This "class" takes one required parameter
+
+1. `changesets` (type: `table`, required)
+    - this should be a table containing only Changeset Instances
 
 #### <a name="useful-side-effect-for-modders---autoload-fix-for-certain-callbacks"></a>Useful Side-Effect for Modders - Autoload Fix for certain Callbacks
 

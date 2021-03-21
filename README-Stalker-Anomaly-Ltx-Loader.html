@@ -22,7 +22,7 @@
 
 <ul>
 <li><a href="#mod-managers">Mod Managers</a></li>
-<li><a href="#no-other-mod-should-overwrite-gamedataconfigsscriptltx">No other Mod should overwrite <code>gamedata\configs\script.ltx</code></a></li>
+<li><a href="#no-other-mod-should-overwrite-gamedataconfigsscriptltx">No other mod should overwrite <code>gamedata\configs\script.ltx</code></a></li>
 <li><a href="#ltx-specific-requirements">LTX specific requirements</a></li>
 </ul></li>
 <li><a href="#how-to-use">How to use</a>
@@ -51,11 +51,13 @@
 <ul>
 <li><a href="#modify-systemltx-specific-properties">Modify system.ltx specific properties</a></li>
 <li><a href="#modify-trader-ltx-specific-properties">Modify trader ltx specific properties</a></li>
+<li><a href="#returning-multiple-changesets-from-a-single-scriptfile">Returning multiple Changesets from a single Scriptfile</a></li>
 <li><a href="#api-documentation">API Documentation</a>
 
 <ul>
 <li><a href="#change">Change</a></li>
 <li><a href="#changeset">Changeset</a></li>
+<li><a href="#changesetcollection">ChangesetCollection</a></li>
 </ul></li>
 <li><a href="#useful-side-effect-for-modders---autoload-fix-for-certain-callbacks">Useful Side-Effect for Modders - Autoload Fix for certain Callbacks</a></li>
 </ul></li>
@@ -163,6 +165,7 @@
 <li><code>gamedata\configs\script.ltx</code></li>
 <li><code>gamedata\scripts\config\Change.lua</code></li>
 <li><code>gamedata\scripts\config\Changeset.lua</code></li>
+<li><code>gamedata\scripts\config\ChangesetCollection.lua</code></li>
 <li><code>gamedata\scripts\config\ChangesetLoader.lua</code></li>
 <li><code>gamedata\scripts\config\ChangeWriter.lua</code></li>
 <li><code>gamedata\scripts\config\File.lua</code></li>
@@ -324,6 +327,28 @@ function registerTraderLtxModifications()
 end
 </code></pre>
 
+<h4><a name="returning-multiple-changesets-from-a-single-scriptfile"></a>Returning multiple Changesets from a single Scriptfile</h4>
+
+<p>This can be done by using the <a href="#changesetcollection">ChangesetCollection</a></p>
+
+<p>Example based on the Trader Files</p>
+
+<pre><code class="lua">local Change = require &quot;gamedata\\scripts\\config\\Change&quot;
+local Changeset = require &quot;gamedata\\scripts\\config\\Changeset&quot;
+local ChangesetCollection = require &quot;gamedata\\scripts\\config\\ChangesetCollection&quot;
+
+function registerTraderLtxModifications()
+    local pdaV1 = Change(&quot;supplies_1&quot;, &quot;device_pda_1&quot;, nil)
+    local pdaV2 = Change(&quot;supplies_1&quot;, &quot;device_pda_2&quot;, &quot;1, 1&quot;)
+    local pdaV3 = Change(&quot;supplies_1&quot;, &quot;device_pda_3&quot;, &quot;1, 1&quot;)
+
+    local ChangesetA = Changeset({pdaV1}, &quot;My Unique Sidorovich Changeset Name&quot;, &quot;items\\trade\\trade_stalker_sidorovich.ltx&quot;)
+    local ChangesetB = Changeset({pdaV2, pdaV3}, &quot;My Unique Barman Changeset Name&quot;, &quot;items\\trade\\bar_barman.ltx&quot;)
+
+    return ChangesetCollection({ChangesetA, ChangesetB})
+end
+</code></pre>
+
 <h4><a name="api-documentation"></a>API Documentation</h4>
 
 <h5><a name="change"></a>Change</h5>
@@ -362,6 +387,18 @@ end
 <ul>
 <li>if not given then the changes will be done on the system.ltx (so if you want to make changes that are contained within the system.ltx then this can be kept empty)</li>
 <li>if given, the changes will be done on the specified ltx file, example <code>items\\trade\\trade_stalker_sidorovich.ltx</code></li>
+</ul></li>
+</ol>
+
+<h5><a name="changesetcollection"></a>ChangesetCollection</h5>
+
+<p>This &ldquo;class&rdquo; takes one required parameter</p>
+
+<ol>
+<li><code>changesets</code> (type: <code>table</code>, required)
+
+<ul>
+<li>this should be a table containing only Changeset Instances</li>
 </ul></li>
 </ol>
 

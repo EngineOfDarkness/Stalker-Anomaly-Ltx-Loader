@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- Issue 13: "Allow Changesets to be nested one level"
+    - See https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/13
+    - `gamedata\scripts\config\ChangesetCollection.lua`
+        - Can be used to return multiple Changesets from a single Scriptfile
+        
+### Changed
+- `gamedata\scripts\config\ChangesetLoader.lua`
+    - Can now handle ChangesetCollection aswell as Changesets
+- `README.md`
+    - Documentation for the ChangesetCollection
+    
+### Fixed
+- `gamedata/scripts/trader_autoload.script`
+    - "invalid order function for sorting"
 
 ## [0.2.1] - 2021-03-19
 ### Added
