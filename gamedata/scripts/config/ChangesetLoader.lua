@@ -54,13 +54,19 @@ function ChangesetLoader:loadChangesets()
 
     for _, filename in ipairs(loadedScripts) do
         local changeset = _G[filename][self.callbackFunctionName]()
+        local isChangeset = self:isChangeset(changeset)
+        local isChangesetCollection = self:isChangesetCollection(changeset)
+        
+        if not isChangeset and not isChangesetCollection then
+            printe("LTX-LIBRARY: ERROR: Return value of '%s' is not a Changeset or ChangesetCollection instance, please see the readme section for 'Changeset' or 'ChangesetCollection', modification will be skipped", filename)
+        end
 
-        if self:isChangeset(changeset) and self:isChangesetValid(changeset, filename) then
+        if isChangeset and self:isChangesetValid(changeset, filename) then
             printf("LTX-LIBRARY: Registered changes from '%s'", changeset.name)
             validChangesets[#validChangesets+1] = changeset
         end
         
-        if self:isChangesetCollection(changeset) and self:isChangesetCollectionValid(changeset, filename) then
+        if isChangesetCollection and self:isChangesetCollectionValid(changeset, filename) then
             changeset:extractChangesets(function(extractedChangeset)
                 if self:isChangesetValid(extractedChangeset, filename) then
                     printf("LTX-LIBRARY: Registered changes from '%s'", extractedChangeset.name)
@@ -73,16 +79,12 @@ function ChangesetLoader:loadChangesets()
     return validChangesets
 end
 
+-- TODO I don't like the validation code - almost 100% duplicate code
 function ChangesetLoader:isChangeset(changeset)
     return changeset and type(changeset.changes) == "table"
 end
 
 function ChangesetLoader:isChangesetValid(changeset, filename)
-    if (not changeset or type(changeset.isValid) ~= "function") then
-        printe("LTX-LIBRARY: ERROR: Return value of '%s' is not a Changeset instance, please see the readme section for 'Changeset', modification will be skipped", filename)
-        return false
-    end
-
     if not changeset:isValid() then
         printe("LTX-LIBRARY: ERROR: The Changeset from filename '%s' has the following errors, modifications will be skipped", filename)
 
@@ -102,12 +104,7 @@ function ChangesetLoader:isChangesetCollection(changesetCollection)
     return type(changesetCollection) == "table" and type(changesetCollection.extractChangesets) == "function"
 end
 
-function ChangesetLoader:isChangesetCollectionValid(changesetCollection, filename)
-    if not changesetCollection or type(changesetCollection.extractChangesets) ~= "function" then
-        printe("LTX-LIBRARY: ERROR: Return value of '%s' is not a ChangesetCollection instance, please see the readme section for 'ChangesetCollection', modification will be skipped", filename)
-        return false
-    end
-    
+function ChangesetLoader:isChangesetCollectionValid(changesetCollection, filename)    
     if not changesetCollection:isValid() then
         printe("LTX-LIBRARY: ERROR: The ChangesetCollection from filename '%s' has the following errors, modifications will be skipped", filename)
 
