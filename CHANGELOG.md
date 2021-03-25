@@ -5,6 +5,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2021-03-25
+### Added
+- Issue 2: "Don't invalidate entire Changeset if one Change inside it is invalid"
+    - See https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/2
+    - Can now define a Changeset as optional (will make all Changesets that are not explicitly configured optional aswell). See readme for details
+- Issue 13: "Allow Changesets to be nested one level"
+    - See https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/13
+    - `gamedata\scripts\config\ChangesetCollection.lua`
+        - Can be used to return multiple Changesets from a single Scriptfile
+        
+### Changed
+- `gamedata\scripts\config\ChangesetLoader.lua`
+    - Can now handle ChangesetCollection aswell as Changesets
+- `README.md`
+    - Documentation for the ChangesetCollection
+    - Updated Documentation for Change and Changeset
+    
+### Removed
+- `gamedata\scripts\config\Ini.lua`
+    - Removed method `reloadSystemIni` due to changes for Issue 19 (https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/19)
+    
+### Fixed
+- `gamedata/scripts/trader_autoload.script`
+    - "invalid order function for sorting"
+- Issue 19: "Refactor the way reloadSystemIni is used"
+    - See https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/19
+    - `reload_ini_sys` and `clear_ini_cache(ini_sys)` will be executed once, if an autoloader sets a global Event via `SetEvent("reloadIniSysRequired", true)`
+
 ## [0.2.1] - 2021-03-19
 ### Added
 - `README-Stalker-Anomaly-Ltx-Loader.html`

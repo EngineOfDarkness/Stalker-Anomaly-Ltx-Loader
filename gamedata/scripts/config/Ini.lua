@@ -58,12 +58,6 @@ end
 
 setmetatable(Ini, {__call = construct})
 
-function Ini:reloadSystemIni()
-    printf("LTX-LIBRARY: Reloading and Clearing ini cache")
-    reload_ini_sys()
-    clear_ini_cache(ini_sys)
-end
-
 function Ini:commitChanges()
     self:createTemporaryFromBackup() -- we'll write to a temp file and copy that over the original, because this for some reason causes less issues
     

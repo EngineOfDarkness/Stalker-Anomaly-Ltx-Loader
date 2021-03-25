@@ -1,4 +1,4 @@
-# Stalker-Anomaly-Ltx-Loader 0.2.1
+# Stalker-Anomaly-Ltx-Loader 0.3.0
 
 A Lua based solution to change Stalker Anomaly LTX Files on the fly once the game starts.
 
@@ -31,9 +31,11 @@ If you have a problem, please copy the output of your Log and create an [Issue](
     - [For Mod Developers](#for-mod-developers)
         - [Modify system.ltx specific properties](#modify-systemltx-specific-properties)
         - [Modify trader ltx specific properties](#modify-trader-ltx-specific-properties)
+        - [Returning multiple Changesets from a single Scriptfile](#returning-multiple-changesets-from-a-single-scriptfile)
         - [API Documentation](#api-documentation)
             - [Change](#change)
             - [Changeset](#changeset)
+            - [ChangesetCollection](#changesetcollection)
         - [Useful Side-Effect for Modders - Autoload Fix for certain Callbacks](#useful-side-effect-for-modders---autoload-fix-for-certain-callbacks)
 - [Roadmap](#roadmap)
 - [Changelog](#changelog)
@@ -131,6 +133,7 @@ If you installed mods the manual way, you need to either remove the following fi
     - `gamedata\configs\script.ltx`
     - `gamedata\scripts\config\Change.lua`
     - `gamedata\scripts\config\Changeset.lua`
+    - `gamedata\scripts\config\ChangesetCollection.lua`
     - `gamedata\scripts\config\ChangesetLoader.lua`
     - `gamedata\scripts\config\ChangeWriter.lua`
     - `gamedata\scripts\config\File.lua`
@@ -260,22 +263,49 @@ function registerTraderLtxModifications()
 end
 ```
 
+#### <a name="returning-multiple-changesets-from-a-single-scriptfile"></a>Returning multiple Changesets from a single Scriptfile
+
+This can be done by using the [ChangesetCollection](#changesetcollection)
+
+Example based on the Trader Files
+
+```lua
+local Change = require "gamedata\\scripts\\config\\Change"
+local Changeset = require "gamedata\\scripts\\config\\Changeset"
+local ChangesetCollection = require "gamedata\\scripts\\config\\ChangesetCollection"
+
+function registerTraderLtxModifications()
+	local pdaV1 = Change("supplies_1", "device_pda_1", nil)
+	local pdaV2 = Change("supplies_1", "device_pda_2", "1, 1")
+	local pdaV3 = Change("supplies_1", "device_pda_3", "1, 1")
+    
+    local ChangesetA = Changeset({pdaV1}, "My Unique Sidorovich Changeset Name", "items\\trade\\trade_stalker_sidorovich.ltx")
+    local ChangesetB = Changeset({pdaV2, pdaV3}, "My Unique Barman Changeset Name", "items\\trade\\bar_barman.ltx")
+	
+	return ChangesetCollection({ChangesetA, ChangesetB})
+end
+```
+
 #### <a name="api-documentation"></a>API Documentation
 
 ##### <a name="change"></a>Change
 
-This "class" takes three required parameters
+This "class" takes three required parameters and one optional parameter
 
-1. `section` (type: `string`)
-2. `property` (type: `string`)
-3. `value` (type: any except `function`)
+1. `section` (type: `string`, required)
+2. `property` (type: `string`, required)
+3. `value` (type: any except `function`, required)
     - this means you cannot pass a function itself, but you can pass a string like `some_scriptname.someScriptFunction` (as used by vanilla anomaly in some instances, e.g. for custom item functors etc.)
     - if you pass `nil` then the property will be removed, pass an empty string if you want the property to be empty.
     - **Handle removal with extra care, the inheriting behaviour of sections (e.g. `[myitem]:parent`) cannot be used at this point, because the `system.ltx` has already been processed, so if you remove a required property the game crashes even if the property is defined in the "parent" section**
+4. `optional` (type: `boolean`, optional)
+    - if not given, then the Changeset `optional` setting will override it
+    - if `true` then the change will always be optional (even if the changeset is set to non optional explicitly)
+    - if set to `false` then the change will always be non-optional (even if the changeset is set to optional explicitly)
 
 ##### <a name="changeset"></a>Changeset
 
-This "class" takes two required parameters and one optional one
+This "class" takes two required parameters and two optional parameters
 
 1. `changes` (type: `table`, required)
     - this should contain a table with one or more [Change](#change) instances
@@ -284,6 +314,17 @@ This "class" takes two required parameters and one optional one
 3. `ltx` (type: `string`, optional)
     - if not given then the changes will be done on the system.ltx (so if you want to make changes that are contained within the system.ltx then this can be kept empty)
     - if given, the changes will be done on the specified ltx file, example `items\\trade\\trade_stalker_sidorovich.ltx`
+4. `optional` (type: `boolean`, optional)
+    - if not given, then the contained Changes will be handled as if they are non-optional (unless a Change specifies otherwise that is)
+    - if `true` then the Changes will be optional by default (unless a Change is explicitly set to `false`)
+    - if `false` then the Changes will be non-optional by default (unless a Change is explicitly set to `true`)
+    
+##### <a name="changesetcollection"></a>ChangesetCollection
+
+This "class" takes one required parameter
+
+1. `changesets` (type: `table`, required)
+    - this should be a table containing only Changeset Instances
 
 #### <a name="useful-side-effect-for-modders---autoload-fix-for-certain-callbacks"></a>Useful Side-Effect for Modders - Autoload Fix for certain Callbacks
 

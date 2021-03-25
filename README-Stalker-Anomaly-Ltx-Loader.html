@@ -1,4 +1,4 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title></title></head><body><h1>Stalker-Anomaly-Ltx-Loader 0.2.1</h1>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title></title></head><body><h1>Stalker-Anomaly-Ltx-Loader 0.3.0</h1>
 
 <p>A Lua based solution to change Stalker Anomaly LTX Files on the fly once the game starts.</p>
 
@@ -22,7 +22,7 @@
 
 <ul>
 <li><a href="#mod-managers">Mod Managers</a></li>
-<li><a href="#no-other-mod-should-overwrite-gamedataconfigsscriptltx">No other Mod should overwrite <code>gamedata\configs\script.ltx</code></a></li>
+<li><a href="#no-other-mod-should-overwrite-gamedataconfigsscriptltx">No other mod should overwrite <code>gamedata\configs\script.ltx</code></a></li>
 <li><a href="#ltx-specific-requirements">LTX specific requirements</a></li>
 </ul></li>
 <li><a href="#how-to-use">How to use</a>
@@ -51,11 +51,13 @@
 <ul>
 <li><a href="#modify-systemltx-specific-properties">Modify system.ltx specific properties</a></li>
 <li><a href="#modify-trader-ltx-specific-properties">Modify trader ltx specific properties</a></li>
+<li><a href="#returning-multiple-changesets-from-a-single-scriptfile">Returning multiple Changesets from a single Scriptfile</a></li>
 <li><a href="#api-documentation">API Documentation</a>
 
 <ul>
 <li><a href="#change">Change</a></li>
 <li><a href="#changeset">Changeset</a></li>
+<li><a href="#changesetcollection">ChangesetCollection</a></li>
 </ul></li>
 <li><a href="#useful-side-effect-for-modders---autoload-fix-for-certain-callbacks">Useful Side-Effect for Modders - Autoload Fix for certain Callbacks</a></li>
 </ul></li>
@@ -163,6 +165,7 @@
 <li><code>gamedata\configs\script.ltx</code></li>
 <li><code>gamedata\scripts\config\Change.lua</code></li>
 <li><code>gamedata\scripts\config\Changeset.lua</code></li>
+<li><code>gamedata\scripts\config\ChangesetCollection.lua</code></li>
 <li><code>gamedata\scripts\config\ChangesetLoader.lua</code></li>
 <li><code>gamedata\scripts\config\ChangeWriter.lua</code></li>
 <li><code>gamedata\scripts\config\File.lua</code></li>
@@ -324,27 +327,56 @@ function registerTraderLtxModifications()
 end
 </code></pre>
 
+<h4><a name="returning-multiple-changesets-from-a-single-scriptfile"></a>Returning multiple Changesets from a single Scriptfile</h4>
+
+<p>This can be done by using the <a href="#changesetcollection">ChangesetCollection</a></p>
+
+<p>Example based on the Trader Files</p>
+
+<pre><code class="lua">local Change = require &quot;gamedata\\scripts\\config\\Change&quot;
+local Changeset = require &quot;gamedata\\scripts\\config\\Changeset&quot;
+local ChangesetCollection = require &quot;gamedata\\scripts\\config\\ChangesetCollection&quot;
+
+function registerTraderLtxModifications()
+    local pdaV1 = Change(&quot;supplies_1&quot;, &quot;device_pda_1&quot;, nil)
+    local pdaV2 = Change(&quot;supplies_1&quot;, &quot;device_pda_2&quot;, &quot;1, 1&quot;)
+    local pdaV3 = Change(&quot;supplies_1&quot;, &quot;device_pda_3&quot;, &quot;1, 1&quot;)
+
+    local ChangesetA = Changeset({pdaV1}, &quot;My Unique Sidorovich Changeset Name&quot;, &quot;items\\trade\\trade_stalker_sidorovich.ltx&quot;)
+    local ChangesetB = Changeset({pdaV2, pdaV3}, &quot;My Unique Barman Changeset Name&quot;, &quot;items\\trade\\bar_barman.ltx&quot;)
+
+    return ChangesetCollection({ChangesetA, ChangesetB})
+end
+</code></pre>
+
 <h4><a name="api-documentation"></a>API Documentation</h4>
 
 <h5><a name="change"></a>Change</h5>
 
-<p>This &ldquo;class&rdquo; takes three required parameters</p>
+<p>This &ldquo;class&rdquo; takes three required parameters and one optional parameter</p>
 
 <ol>
-<li><code>section</code> (type: <code>string</code>)</li>
-<li><code>property</code> (type: <code>string</code>)</li>
-<li><code>value</code> (type: any except <code>function</code>)
+<li><code>section</code> (type: <code>string</code>, required)</li>
+<li><code>property</code> (type: <code>string</code>, required)</li>
+<li><code>value</code> (type: any except <code>function</code>, required)
 
 <ul>
 <li>this means you cannot pass a function itself, but you can pass a string like <code>some_scriptname.someScriptFunction</code> (as used by vanilla anomaly in some instances, e.g. for custom item functors etc.)</li>
 <li>if you pass <code>nil</code> then the property will be removed, pass an empty string if you want the property to be empty.</li>
 <li><strong>Handle removal with extra care, the inheriting behaviour of sections (e.g. <code>[myitem]:parent</code>) cannot be used at this point, because the <code>system.ltx</code> has already been processed, so if you remove a required property the game crashes even if the property is defined in the &ldquo;parent&rdquo; section</strong></li>
 </ul></li>
+<li><code>optional</code> (type: <code>boolean</code>, optional)
+
+<ul>
+<li>if not given, then the Changeset <code>optional</code> setting will override it</li>
+<li>if <code>true</code> then the change will always be optional (even if the changeset is set to non optional explicitly)</li>
+<li>if set to <code>false</code> then the change will always be non-optional (even if the changeset is set to optional explicitly)</li>
+</ul></li>
 </ol>
 
 <h5><a name="changeset"></a>Changeset</h5>
 
-<p>This &ldquo;class&rdquo; takes two required parameters and one optional one</p>
+<p>This &ldquo;class&rdquo; takes two required parameters and two optional parameters</p>
 
 <ol>
 <li><code>changes</code> (type: <code>table</code>, required)
@@ -362,6 +394,25 @@ end
 <ul>
 <li>if not given then the changes will be done on the system.ltx (so if you want to make changes that are contained within the system.ltx then this can be kept empty)</li>
 <li>if given, the changes will be done on the specified ltx file, example <code>items\\trade\\trade_stalker_sidorovich.ltx</code></li>
+</ul></li>
+<li><code>optional</code> (type: <code>boolean</code>, optional)
+
+<ul>
+<li>if not given, then the contained Changes will be handled as if they are non-optional (unless a Change specifies otherwise that is)</li>
+<li>if <code>true</code> then the Changes will be optional by default (unless a Change is explicitly set to <code>false</code>)</li>
+<li>if <code>false</code> then the Changes will be non-optional by default (unless a Change is explicitly set to <code>true</code>)</li>
+</ul></li>
+</ol>
+
+<h5><a name="changesetcollection"></a>ChangesetCollection</h5>
+
+<p>This &ldquo;class&rdquo; takes one required parameter</p>
+
+<ol>
+<li><code>changesets</code> (type: <code>table</code>, required)
+
+<ul>
+<li>this should be a table containing only Changeset Instances</li>
 </ul></li>
 </ol>
 
