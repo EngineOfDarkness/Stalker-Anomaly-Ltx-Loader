@@ -290,18 +290,22 @@ end
 
 ##### <a name="change"></a>Change
 
-This "class" takes three required parameters
+This "class" takes three required parameters and one optional parameter
 
-1. `section` (type: `string`)
-2. `property` (type: `string`)
-3. `value` (type: any except `function`)
+1. `section` (type: `string`, required)
+2. `property` (type: `string`, required)
+3. `value` (type: any except `function`, required)
     - this means you cannot pass a function itself, but you can pass a string like `some_scriptname.someScriptFunction` (as used by vanilla anomaly in some instances, e.g. for custom item functors etc.)
     - if you pass `nil` then the property will be removed, pass an empty string if you want the property to be empty.
     - **Handle removal with extra care, the inheriting behaviour of sections (e.g. `[myitem]:parent`) cannot be used at this point, because the `system.ltx` has already been processed, so if you remove a required property the game crashes even if the property is defined in the "parent" section**
+4. `optional` (type: `boolean`, optional)
+    - if not given, then the Changeset `optional` setting will override it
+    - if `true` then the change will always be optional (even if the changeset is set to non optional explicitly)
+    - if set to `false` then the change will always be non-optional (even if the changeset is set to optional explicitly)
 
 ##### <a name="changeset"></a>Changeset
 
-This "class" takes two required parameters and one optional one
+This "class" takes two required parameters and two optional parameters
 
 1. `changes` (type: `table`, required)
     - this should contain a table with one or more [Change](#change) instances
@@ -310,6 +314,10 @@ This "class" takes two required parameters and one optional one
 3. `ltx` (type: `string`, optional)
     - if not given then the changes will be done on the system.ltx (so if you want to make changes that are contained within the system.ltx then this can be kept empty)
     - if given, the changes will be done on the specified ltx file, example `items\\trade\\trade_stalker_sidorovich.ltx`
+4. `optional` (type: `boolean`, optional)
+    - if not given, then the contained Changes will be handled as if they are non-optional (unless a Change specifies otherwise that is)
+    - if `true` then the Changes will be optional by default (unless a Change is explicitly set to `false`)
+    - if `false` then the Changes will be non-optional by default (unless a Change is explicitly set to `true`)
     
 ##### <a name="changesetcollection"></a>ChangesetCollection
 

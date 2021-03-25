@@ -13,7 +13,8 @@
     -- first require the module
     local Change = require "gamedata\\scripts\\config\\Change"
     
-    -- then create an instance - all parameters are required, the last parameter can be "nil" if you want to remove the property
+    -- then create an instance - the first three parameters are required, the propertyValue can be "nil" if you want to remove the property
+    -- the last parameter controls if this change can be discarded from the changeset if it happens to be invalid (e.g. if another mod removed a section)
     local changeInstance = Change("sectionName", "propertyName", "propertyValue")
 
 --]]
@@ -21,13 +22,14 @@
 local Change    = {}
 Change.__index  = Change
 
-local function construct(_, section, property, value)
+local function construct(_, section, property, value, optional)
     local newChange = {}
     setmetatable(newChange, Change)
 
     newChange.section   = section
     newChange.property  = property
     newChange.value     = value
+    newChange.optional  = optional
     newChange.errors    = {}
 
     newChange:validateProperties()
@@ -54,11 +56,14 @@ function Change:validateProperties()
 
     if type(self.section) ~= "string" then
         self:addError("Change ERROR: 'section' expects a string")
-        return
     end
 
     if type(self.section) == "string" and string.len(self.section) == 0 then
         self:addError("Change ERROR: 'section' cannot be an empty string")
+    end
+    
+    if type(self.optional) ~= "boolean" and type(self.optional) ~= "nil" then
+        self:addError("Change ERROR: 'optional' can only be nil or a boolean value")
         return
     end
 end
@@ -69,6 +74,10 @@ end
 
 function Change:isValid()
     return #self.errors == 0
+end
+
+function Change:isOptional()
+    return self.optional
 end
 
 return Change

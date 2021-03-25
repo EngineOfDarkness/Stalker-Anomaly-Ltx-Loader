@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 ### Added
+- Issue 2: "Don't invalidate entire Changeset if one Change inside it is invalid"
+    - See https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/2
+    - Can now define a Changeset as optional (will make all Changesets that are not explicitly configured optional aswell). See readme for details
 - Issue 13: "Allow Changesets to be nested one level"
     - See https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/13
     - `gamedata\scripts\config\ChangesetCollection.lua`
@@ -15,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     - Can now handle ChangesetCollection aswell as Changesets
 - `README.md`
     - Documentation for the ChangesetCollection
+    - Updated Documentation for Change and Changeset
     
 ### Removed
 - `gamedata\scripts\config\Ini.lua`

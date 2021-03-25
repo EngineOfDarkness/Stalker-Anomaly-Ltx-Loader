@@ -90,11 +90,21 @@ function ChangesetLoader:isChangesetValid(changeset, filename)
 
         local allChangesetErrors = changeset.errors
 
-        for errorIndex, errorMessage in ipairs(allChangesetErrors) do
+        for _, errorMessage in ipairs(allChangesetErrors) do
             printe(" > " .. errorMessage)
         end
 
         return false
+    end
+    
+    if #changeset.warningsInvalidChanges ~= 0 then
+        printe("LTX-LIBRARY: WARNING: The Changeset from filename '%s' has the following warnings, these optional Changes will be skipped", filename)
+
+        local allChangesetWarnings = changeset.warningsInvalidChanges
+
+        for _, warningMessage in ipairs(allChangesetWarnings) do
+            printe(" > " .. warningMessage)
+        end
     end
 
     return true
