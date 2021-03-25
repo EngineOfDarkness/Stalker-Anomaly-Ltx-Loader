@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+
+## [0.3.0] - 2021-03-25
 ### Added
 - Issue 2: "Don't invalidate entire Changeset if one Change inside it is invalid"
     - See https://github.com/EngineOfDarkness/Stalker-Anomaly-Ltx-Loader/issues/2

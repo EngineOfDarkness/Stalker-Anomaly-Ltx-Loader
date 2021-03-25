@@ -1,4 +1,4 @@
-# Stalker-Anomaly-Ltx-Loader 0.2.1
+# Stalker-Anomaly-Ltx-Loader 0.3.0
 
 A Lua based solution to change Stalker Anomaly LTX Files on the fly once the game starts.
 
